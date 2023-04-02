@@ -69,15 +69,21 @@ def register():
 
         # Ensure username was submitted
         if not username:
-            return apology("must provide username", 400)
+            flash("Please provide username!")
+            alert_type = "alert-danger"
+            return render_template("register.html", alert_type=alert_type)
         
         # Ensure password was submitted
         elif not password:
-            return apology("must provide password", 400)
+            flash("Please provide password!")
+            alert_type = "alert-danger"
+            return render_template("register.html", alert_type=alert_type)
         
         # Ensure the confirmation matches the original password
         elif password != confirmation:
-            return apology("passwords do not match", 400)
+            flash("Passwords do not match!")
+            alert_type = "alert-danger"
+            return render_template("register.html", alert_type=alert_type)
         
         # Check if username already exists
         conn = create_connection(database)
@@ -86,7 +92,9 @@ def register():
             cur.execute("SELECT username FROM users WHERE username = ?", (username,))
             rows = cur.fetchall()
             if rows:
-                return apology("username already exists", 400)
+                flash("Username already exists")
+                alert_type = "alert-danger"
+                return render_template("register.html", alert_type=alert_type)
 
         # Insert new user into database
         conn = create_connection(database)
@@ -96,9 +104,10 @@ def register():
 
         # Flash
         flash("Registered!")
+        alert_type = "alert-primary"
 
-        # Redirect user to home page
-        return redirect("/")
+        # Redirect user to login page
+        return render_template("login.html", alert_type=alert_type)
 
     # User reached route via GET (as by clicking a link or via redirect)
     else:
@@ -119,12 +128,16 @@ def login():
         password = request.form.get("password")
 
         # Ensure username was submitted
-        if not request.form.get("username"):
-            return apology("must provide username", 400)
+        if not username:
+            flash("Please provide username!")
+            alert_type = "alert-danger"
+            return render_template("login.html", alert_type=alert_type)
             
         # Ensure password was submitted
-        elif not request.form.get("password"):
-            return apology("must provide password", 400)
+        elif not password:
+            flash("Please provide password!")
+            alert_type = "alert-danger"
+            return render_template("login.html", alert_type=alert_type)
         
         # Query database for username
         conn = create_connection(database)
@@ -133,14 +146,20 @@ def login():
             cur.execute("SELECT * FROM users WHERE username = ?", (username,))
             rows = cur.fetchall()
             if len(rows) != 1 or not check_password_hash(rows[0][2], password):
-                return apology("invalid username and/or password", 400)
+                flash("Invalid username and/or password!")
+                alert_type = "alert-danger"
+                return render_template("login.html", alert_type=alert_type)
             
         # Remember which user has logged in
         session["user_id"] = rows[0][0]
         print(rows[0][0])
 
+        # Flash
+        flash("Logged in!")
+        alert_type = "alert-primary"
+
         # Redirect user to home page
-        return redirect("/") 
+        return render_template("index.html", alert_type=alert_type)
     
     # User reached route via GET (as by clicking a link or via redirect)
     else:
