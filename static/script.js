@@ -5,10 +5,24 @@ document.addEventListener("DOMContentLoaded", function () {
     lightSwitch.addEventListener("change", function () {
         if (this.checked) {
             document.documentElement.setAttribute("data-bs-theme", "dark");
+            // Remember user's preference when reloading the page
+            localStorage.setItem("lightSwitch", "dark");
         } else {
             document.documentElement.setAttribute("data-bs-theme", "light");
+            // Remember user's preference when reloading the page
+            localStorage.setItem("lightSwitch", "light");
         }
     })
-  });
+
+    // Remember user's preference when reloading the page
+    if (localStorage.getItem("lightSwitch") === "dark") {
+        document.documentElement.setAttribute("data-bs-theme", "dark");
+        document.getElementById("lightSwitch").checked = true;
+    } else {
+        document.documentElement.setAttribute("data-bs-theme", "light");
+    }
+});
+
+
 
 
