@@ -78,3 +78,12 @@ z-index: 1500;
 .light-switch-list-item {
     margin-right: 3rem;
 }
+
+.navbar-brand {
+    margin-top: 8px;
+    font-size: 1rem;
+}
+
+#light-switch-label {
+    margin-left: 0.2rem !important;
+}
