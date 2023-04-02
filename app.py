@@ -4,7 +4,7 @@ from flask import Flask, flash, redirect, render_template, request, session
 from flask_session import Session
 from werkzeug.security import check_password_hash, generate_password_hash
 
-from helpers import apology
+from helpers import apology, login_required
 
 
 # Main function
@@ -152,7 +152,6 @@ def login():
             
         # Remember which user has logged in
         session["user_id"] = rows[0][0]
-        print(rows[0][0])
 
         # Flash
         flash("Logged in!")
@@ -175,7 +174,12 @@ def logout():
     # Redirect user to login form
     return redirect("/")
 
+@app.route("/habits", methods=["GET", "POST"])
+@login_required
+def habits():
+    """ Habits page """
 
+    return render_template("habits.html")
 
 
 
