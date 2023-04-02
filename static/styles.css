@@ -66,6 +66,15 @@ white-space: nowrap;
 --bs-btn-active-bg: #5a23c8;
 --bs-btn-active-border-color: #5a23c8;
 }
+
 .bd-mode-toggle {
 z-index: 1500;
+}
+
+#light_switch_container {
+    margin: 0 !important;
+}
+
+.light-switch-list-item {
+    margin-right: 3rem;
 }
