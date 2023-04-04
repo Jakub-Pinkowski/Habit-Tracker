@@ -87,3 +87,11 @@ z-index: 1500;
 #light-switch-label {
     margin-left: 0.2rem !important;
 }
+
+.btn-outline-danger {
+    margin-top: 1rem;
+}
+
+.text-body-secondary {
+    margin-left: 0.5rem;
+}
