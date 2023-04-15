@@ -3,6 +3,7 @@ from sqlite3 import Error
 from flask import Flask, flash, redirect, render_template, request, session
 from flask_session import Session
 from werkzeug.security import check_password_hash, generate_password_hash
+from datetime import date
 
 from helpers import apology, login_required
 
@@ -47,12 +48,6 @@ def create_user(conn, user):
 
 
 # Define routes
-
-@app.route("/", methods=["GET", "POST"])
-def index():
-    """ Homepage """
-
-    return render_template("index.html")
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
@@ -174,12 +169,79 @@ def logout():
     # Redirect user to login form
     return redirect("/")
 
+@app.route("/", methods=["GET", "POST"])
+@login_required
+def index():
+    """ Homepage """
+
+    # User reached route via POST (as by submitting a form via POST)
+    if request.method == "POST":
+
+        # Create variables
+        today = date.today()
+        habit1 = request.form.get("habit1")
+        user_id = session["user_id"]
+
+        # Check if there is already an entry with value habit1 or minus_habit1 for today in the database
+        conn = create_connection(database)
+        with conn:
+            cur = conn.cursor()
+            # Checks if there is already an entry with value habit1 for today in the database
+            cur.execute("SELECT * FROM habits WHERE users_id = ? AND date = ? AND habits = ?", (user_id, today, habit1))
+            rows1 = cur.fetchall()
+            print(rows1)
+            if rows1:
+                return render_template("index.html")
+
+        # Insert habit entry into database
+        conn = create_connection(database)
+        with conn:
+            cur = conn.cursor()
+            cur.execute("INSERT OR IGNORE INTO habits (users_id, date, habits) VALUES(?, ?, ?)", (user_id, today, habit1))
+            conn.commit()
+
+
+
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        return render_template("index.html")
+    
+    # User reached route via GET (as by clicking a link or via redirect)
+    else:
+        return render_template("index.html")
+
 @app.route("/habits", methods=["GET", "POST"])
 @login_required
 def habits():
     """ Habits page """
 
     return render_template("habits.html")
+
+@app.route("/dashboard", methods=["GET", "POST"])
+@login_required
+def dashboard():
+    """ Dashboard page """
+
+    return render_template("dashboard.html")
+
 
 
 
