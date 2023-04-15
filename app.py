@@ -190,6 +190,7 @@ def index():
             # Checks if there is already the same entry for today for this habit in the database
             cur.execute("SELECT * FROM habits WHERE users_id = ? AND date = ? AND habit = ? AND value = ?", (user_id, today, habit1, value_habit1))
             rows1 = cur.fetchall()
+            print(rows1)
             if rows1:
                 return render_template("index.html")
             # Checks if there is already an entry for today for this habit in the database
@@ -200,12 +201,12 @@ def index():
                 cur.execute("UPDATE habits SET value = ? WHERE users_id = ? AND date = ? AND habit = ?", (value_habit1, user_id, today, habit1))
                 conn.commit()
                 return render_template("index.html")
+            elif not rows2:
+                # Insert habit entry into database if there is none for today
+                cur.execute("INSERT OR IGNORE INTO habits (users_id, date, habit, value) VALUES(?, ?, ?, ?)", (user_id, today, habit1, value_habit1))
+                conn.commit()
+            
 
-        # Insert habit entry into database if there is none for today
-        with conn:
-            cur = conn.cursor()
-            cur.execute("INSERT OR IGNORE INTO habits (users_id, date, habit, value) VALUES(?, ?, ?, ?)", (user_id, today, habit1, value_habit1))
-            conn.commit()
 
 
 
