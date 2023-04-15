@@ -178,26 +178,33 @@ def index():
     if request.method == "POST":
 
         # Create variables
+        user_id = session["user_id"]
         today = date.today()
         habit1 = request.form.get("habit1")
-        user_id = session["user_id"]
+        value_habit1 = request.form.get("value1")
 
-        # Check if there is already an entry with value habit1 or minus_habit1 for today in the database
+        # Check if there is already an entry for today for habit1 in the database
         conn = create_connection(database)
         with conn:
             cur = conn.cursor()
-            # Checks if there is already an entry with value habit1 for today in the database
-            cur.execute("SELECT * FROM habits WHERE users_id = ? AND date = ? AND habits = ?", (user_id, today, habit1))
+            # Checks if there is already the same entry for today for this habit in the database
+            cur.execute("SELECT * FROM habits WHERE users_id = ? AND date = ? AND habit = ? AND value = ?", (user_id, today, habit1, value_habit1))
             rows1 = cur.fetchall()
-            print(rows1)
             if rows1:
                 return render_template("index.html")
+            # Checks if there is already an entry for today for this habit in the database
+            cur.execute("SELECT * FROM habits WHERE users_id = ? AND date = ? AND habit = ?", (user_id, today, habit1))
+            rows2 = cur.fetchall()
+            if rows2:
+                # If there is an entry for today for this habit in the database, update the value
+                cur.execute("UPDATE habits SET value = ? WHERE users_id = ? AND date = ? AND habit = ?", (value_habit1, user_id, today, habit1))
+                conn.commit()
+                return render_template("index.html")
 
-        # Insert habit entry into database
-        conn = create_connection(database)
+        # Insert habit entry into database if there is none for today
         with conn:
             cur = conn.cursor()
-            cur.execute("INSERT OR IGNORE INTO habits (users_id, date, habits) VALUES(?, ?, ?)", (user_id, today, habit1))
+            cur.execute("INSERT OR IGNORE INTO habits (users_id, date, habit, value) VALUES(?, ?, ?, ?)", (user_id, today, habit1, value_habit1))
             conn.commit()
 
 
