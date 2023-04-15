@@ -7,61 +7,32 @@
 {% block main %}    
 
 <div class="row row-cols-1 row-cols-md-3 mb-3 text-center">
+
+  {% for habit in habits %}
+
     <div class="col">
       <div class="card mb-4 rounded-3 shadow-sm">
         <div class="card-header py-3">
-          <h4 class="my-0 fw-normal">Exercise</h4>
+          <h4 class="my-0 fw-normal">{{ habit.name }}</h4>
         </div>
         <div class="card-body">
-          <h1 class="card-title pricing-card-title">3<small class="text-body-secondary fw-light">days streak</small></h1>
-          <ul class="list-unstyled mt-3 mb-4">
-            <li>Keep it going!</li>
-          </ul>
-            <form action="/" method="post">
-              <input type="hidden" id="habit1" name="habit1" value="exercise">
-              <button type="input" class="w-100 btn btn-lg btn-outline-success"
-               id="value1" name="value1" type="button" value="1">Done</button>
-              <button type="input" class="w-100 btn btn-lg btn-outline-danger"
-               id="value1" name="value1" type="button" value="-1">Missed</button>
-            </form>
-        </div>
-      </div>
-    </div>
-    <div class="col">
-      <div class="card mb-4 rounded-3 shadow-sm">
-        <div class="card-header py-3">
-          <h4 class="my-0 fw-normal">Bed early</h4>
-        </div>
-        <div class="card-body">
-          <h1 class="card-title pricing-card-title">4<small class="text-body-secondary fw-light">days streak</small></h1>
+          <h1 class="card-title pricing-card-title">{{ habit.streak }}<small class="text-body-secondary fw-light">days streak</small></h1>
           <ul class="list-unstyled mt-3 mb-4">
             <li>Keep it going!</li>
           </ul>
           <form action="/" method="post">
-            <input type="hidden" id="habit2" name="habit2" value="bed_early">
+            <input type="hidden" id="habit{{ habit.id }}" name="habit{{ habit.id }}" value="{{ habit.name }}">
             <button type="input" class="w-100 btn btn-lg btn-outline-success"
-             id="value2" name="value2" type="button" value="1">Done</button>
+             id="value{{ habit.id }}" name="value{{ habit.id }}" type="button" value="1">Done</button>
             <button type="input" class="w-100 btn btn-lg btn-outline-danger"
-             id="value2" name="value2" type="button" value="-1">Missed</button>
+             id="value{{ habit.id }}" name="value{{ habit.id }}" type="button" value="-1">Missed</button>
           </form>
         </div>
       </div>
     </div>
-    <div class="col">
-      <div class="card mb-4 rounded-3 shadow-sm">
-        <div class="card-header py-3">
-          <h4 class="my-0 fw-normal">No smoking</h4>
-        </div>
-        <div class="card-body">
-          <h1 class="card-title pricing-card-title">0<small class="text-body-secondary fw-light">days streak</small></h1>
-          <ul class="list-unstyled mt-3 mb-4">
-            <li>You can do better!</li>
-          </ul>
-            <button type="button" class="w-100 btn btn-lg btn-outline-success">Done</button>
-            <button type="button" class="w-100 btn btn-lg btn-outline-danger">Missed</button>
-        </div>
-      </div>
-    </div>
-  </div>
+
+    {% endfor %}
+
+</div>
 
 {% endblock %}
