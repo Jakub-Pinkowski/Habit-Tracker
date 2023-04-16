@@ -215,7 +215,8 @@ def index():
                     cur.execute("SELECT * FROM history WHERE users_id = ? AND date = ? AND habit = ? AND value = ?", (user_id, today, habit_name, value))
                     rows1 = cur.fetchall()
                     if rows1:
-                        continue # skip to next habit
+                        # Skip to next habit
+                        continue 
 
                     # Checks if there is already an entry (no matter the value) for today for this habit in the database
                     cur.execute("SELECT * FROM history WHERE users_id = ? AND date = ? AND habit = ?", (user_id, today, habit_name))
@@ -231,6 +232,7 @@ def index():
 
         # Count streak for each habit and update this value in the Habit object
         for habit in habits:
+            user_id = session["user_id"]
             streak = 0
             habit_name = habit.name
             habit_id = habit.id
@@ -334,7 +336,7 @@ def habits():
 
             # Flash
             flash("Habit added!")
-            alert_type = "alert-success"
+            alert_type = "alert-primary"
 
             # Update habits list
             habits.append(new_habit)
