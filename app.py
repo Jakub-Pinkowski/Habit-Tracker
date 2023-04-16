@@ -175,25 +175,28 @@ def index():
     """ Homepage """
 
     # create a list of Habit objects
-    habits = [
-        Habit("Running", 1, 0),
-        Habit("Reading", 2, 0),
-        Habit("Meditation", 3, 0),
-        Habit("Writing", 4, 0),
-        Habit("Drawing", 5, 0),
-    ]
+    habits = []
 
-      
+
+    # Append habits list from database
+    conn = create_connection(database)
+    with conn:
+        cur = conn.cursor()
+        cur.execute("SELECT habit FROM habits")
+        rows = cur.fetchall()
+        for row in rows:
+            habits.append(Habit(row[0], len(habits) + 1, 0))
+
 
     # Create variables
     user_id = session["user_id"]
     today = date.today()
 
+
     # User reached route via POST (as by submitting a form via POST)
     if request.method == "POST":
 
-
-        # Loop through all submitted habits and values
+        # Loop through all habits and values
         for habit_id, habit_name in request.form.items():
             if habit_id.startswith("habit") and habit_name:
                 value_id = habit_id.replace("habit", "value")
@@ -212,21 +215,21 @@ def index():
                 with conn:
                     cur = conn.cursor()
                     # Checks if there is already the same entry for today for this habit in the database
-                    cur.execute("SELECT * FROM habits WHERE users_id = ? AND date = ? AND habit = ? AND value = ?", (user_id, today, habit_name, value))
+                    cur.execute("SELECT * FROM history WHERE users_id = ? AND date = ? AND habit = ? AND value = ?", (user_id, today, habit_name, value))
                     rows1 = cur.fetchall()
                     if rows1:
                         continue # skip to next habit
 
                     # Checks if there is already an entry (no matter the value) for today for this habit in the database
-                    cur.execute("SELECT * FROM habits WHERE users_id = ? AND date = ? AND habit = ?", (user_id, today, habit_name))
+                    cur.execute("SELECT * FROM history WHERE users_id = ? AND date = ? AND habit = ?", (user_id, today, habit_name))
                     rows2 = cur.fetchall()
                     if rows2:
                         # If there is an entry for today for this habit in the database, update the value
-                        cur.execute("UPDATE habits SET value = ? WHERE users_id = ? AND date = ? AND habit = ?", (value, user_id, today, habit_name))
+                        cur.execute("UPDATE history SET value = ? WHERE users_id = ? AND date = ? AND habit = ?", (value, user_id, today, habit_name))
                         conn.commit()
                     else:
                         # Insert habit entry into database if there is none for today
-                        cur.execute("INSERT OR IGNORE INTO habits (users_id, date, habit, value) VALUES(?, ?, ?, ?)", (user_id, today, habit_name, value))
+                        cur.execute("INSERT OR IGNORE INTO history (users_id, date, habit, value) VALUES(?, ?, ?, ?)", (user_id, today, habit_name, value))
                         conn.commit()
 
 
@@ -239,7 +242,7 @@ def index():
             conn = create_connection(database)
             with conn:
                 cur = conn.cursor()
-                cur.execute("SELECT * FROM habits WHERE users_id = ? AND habit = ? ORDER BY date DESC", (user_id, habit_name))
+                cur.execute("SELECT * FROM history WHERE users_id = ? AND habit = ? ORDER BY date DESC", (user_id, habit_name))
                 rows = cur.fetchall()
                 for row in rows:
                     print(rows)
@@ -263,7 +266,7 @@ def index():
             conn = create_connection(database)
             with conn:
                 cur = conn.cursor()
-                cur.execute("SELECT * FROM habits WHERE users_id = ? AND habit = ? ORDER BY date DESC", (user_id, habit_name))
+                cur.execute("SELECT * FROM history WHERE users_id = ? AND habit = ? ORDER BY date DESC", (user_id, habit_name))
                 rows = cur.fetchall()
                 for row in rows:
                     print(rows)
@@ -280,7 +283,71 @@ def index():
 def habits():
     """ Habits page """
 
-    return render_template("habits.html")
+    # List all habits from database
+
+    # User reached route via POST (as by submitting a form via POST)
+    if request.method == "POST":
+
+        # Get habit name from input field
+        habit = request.form.get("new_habit")
+
+        habits = []
+        user_id = session["user_id"]
+        conn = create_connection(database)
+        with conn:
+            cur = conn.cursor()
+            cur.execute("SELECT habit FROM habits WHERE users_id = ?", (user_id,))
+            rows = cur.fetchall()
+            for row in rows:
+                habits.append(row[0])
+
+        # Ensure habit was submitted
+        if not habit:
+            flash("Please provide habit!")
+            alert_type = "alert-danger"
+            return render_template("habits.html", alert_type=alert_type, habits=habits)
+
+        # Insert habit into database
+        user_id = session["user_id"]
+        conn = create_connection(database)
+        with conn:
+            cur = conn.cursor()
+            cur.execute("INSERT OR IGNORE INTO habits (users_id, habit) VALUES(?, ?)", (user_id, habit))
+            conn.commit()
+
+        # Flash
+        flash("Habit added!")
+        alert_type = "alert-success"
+
+        # Update habits list
+        habits = []
+        user_id = session["user_id"]
+        conn = create_connection(database)
+        with conn:
+            cur = conn.cursor()
+            cur.execute("SELECT habit FROM habits WHERE users_id = ?", (user_id,))
+            rows = cur.fetchall()
+            for row in rows:
+                habits.append(row[0])
+        
+
+        # Redirect user to habits page
+        return render_template("habits.html", alert_type=alert_type, habits=habits)
+        
+
+    # User reached route via GET (as by clicking a link or via redirect)
+    habits = []
+    user_id = session["user_id"]
+    conn = create_connection(database)
+    with conn:
+        cur = conn.cursor()
+        cur.execute("SELECT habit FROM habits WHERE users_id = ?", (user_id,))
+        rows = cur.fetchall()
+        for row in rows:
+            habits.append(row[0])
+    
+
+    return render_template("habits.html", habits=habits)
 
 @app.route("/dashboard", methods=["GET", "POST"])
 @login_required

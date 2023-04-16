@@ -21,6 +21,8 @@ document.addEventListener("DOMContentLoaded", function () {
     } else {
         document.documentElement.setAttribute("data-bs-theme", "light");
     }
+
+    
 });
 
 

@@ -95,3 +95,43 @@ z-index: 1500;
 .text-body-secondary {
     margin-left: 0.5rem;
 }
+
+#add_habit {
+    padding-left: 0.5rem;
+}
+
+.new_habit_container {
+    padding-top: 2rem;
+}
+
+.trash {
+    margin: 0;
+}
+
+.list-group {
+    width: 100%;
+    max-width: 360px;
+    margin-inline: 1.5rem;
+    border-radius: .5rem !important;
+  }
+  
+.list-group-item {
+    cursor: pointer;
+    border-radius: .5rem !important;
+  }
+
+.habit-options {
+    margin: 1px;
+}
+
+#new_habit_input {
+    border: 1px solid;
+    border-radius: 0.5rem;
+    border-color: #6c757d;
+    padding: 1rem;
+}
+
+#new_habit_button {
+    border-radius: 0.5rem;
+    padding: 1rem;
+}
