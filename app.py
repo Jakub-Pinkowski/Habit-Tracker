@@ -153,7 +153,7 @@ def login():
         alert_type = "alert-primary"
 
         # Redirect user to home page
-        return render_template("index.html", alert_type=alert_type)
+        return redirect("/")
     
     # User reached route via GET (as by clicking a link or via redirect)
     else:
@@ -176,11 +176,14 @@ def index():
 
     # create a list of Habit objects
     habits = [
-        Habit("Running", 1),
-        Habit("Reading", 2),
-        Habit("Meditation", 3),
-        Habit("Writing", 4),
+        Habit("Running", 1, 0),
+        Habit("Reading", 2, 0),
+        Habit("Meditation", 3, 0),
+        Habit("Writing", 4, 0),
+        Habit("Drawing", 5, 0),
     ]
+
+      
 
     # Create variables
     user_id = session["user_id"]
@@ -189,11 +192,20 @@ def index():
     # User reached route via POST (as by submitting a form via POST)
     if request.method == "POST":
 
+
         # Loop through all submitted habits and values
         for habit_id, habit_name in request.form.items():
             if habit_id.startswith("habit") and habit_name:
                 value_id = habit_id.replace("habit", "value")
                 value = request.form.get(value_id)
+
+                # If the value of pressed button is 1 then flash user with message "Well done" if the value is -1 then flash user with message "You can do it"
+                if value == "1":
+                    flash("Well done!")
+                    alert_type = "alert-success"
+                elif value == "-1":
+                    flash("Git gut lol")
+                    alert_type = "alert-danger"
 
                 # Check if there is already an entry for today for the habit in the database
                 conn = create_connection(database)
@@ -217,11 +229,50 @@ def index():
                         cur.execute("INSERT OR IGNORE INTO habits (users_id, date, habit, value) VALUES(?, ?, ?, ?)", (user_id, today, habit_name, value))
                         conn.commit()
 
-        return render_template("index.html", habits=habits)
+
+        # Count streak for each habit and update this value in the Habit object
+        for habit in habits:
+            streak = 0
+            habit_name = habit.name
+            habit_id = habit.id
+            user_id = session["user_id"]
+            conn = create_connection(database)
+            with conn:
+                cur = conn.cursor()
+                cur.execute("SELECT * FROM habits WHERE users_id = ? AND habit = ? ORDER BY date DESC", (user_id, habit_name))
+                rows = cur.fetchall()
+                for row in rows:
+                    print(rows)
+                    if row[2] == 1:
+                        streak += 1
+                    else:
+                        break
+            habit.streak = streak
+
+        return render_template("index.html", habits=habits, alert_type=alert_type)
             
-    
     # User reached route via GET (as by clicking a link or via redirect)
     else:
+
+        # Count streak for each habit and update this value in the Habit object
+        for habit in habits:
+            streak = 0
+            habit_name = habit.name
+            habit_id = habit.id
+            user_id = session["user_id"]
+            conn = create_connection(database)
+            with conn:
+                cur = conn.cursor()
+                cur.execute("SELECT * FROM habits WHERE users_id = ? AND habit = ? ORDER BY date DESC", (user_id, habit_name))
+                rows = cur.fetchall()
+                for row in rows:
+                    print(rows)
+                    if row[2] == 1:
+                        streak += 1
+                    else:
+                        break
+            habit.streak = streak
+
         return render_template("index.html", habits=habits)
 
 @app.route("/habits", methods=["GET", "POST"])

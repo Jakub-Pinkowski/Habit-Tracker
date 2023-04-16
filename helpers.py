@@ -28,6 +28,7 @@ def login_required(f):
 
 
 class Habit:
-    def __init__(self, name, id):
+    def __init__(self, name, id, streak):
         self.name = name
         self.id = id
+        self.streak = streak
