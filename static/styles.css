@@ -106,6 +106,7 @@ z-index: 1500;
 
 .trash {
     margin: 0;
+    margin-left: 1rem !important;
 }
 
 .list-group {
@@ -142,4 +143,16 @@ z-index: 1500;
 
 #register_instead {
     margin-top: 2rem;
+}
+
+.dropdown-item {
+    padding: 0.5rem;
+}
+
+.dropdown-menu {
+    width: 301px;
+}
+
+#trash-dropdown {
+    color: #dc3545;
 }

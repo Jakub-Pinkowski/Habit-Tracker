@@ -337,7 +337,7 @@ def habits():
             conn = create_connection(database)
             with conn:
                 cur = conn.cursor()
-                cur.execute("INSERT INTO habits (users_id, habit) VALUES(?, ?)", (user_id, new_habit))
+                cur.execute("INSERT OR IGNORE INTO habits (users_id, habit) VALUES(?, ?)", (user_id, new_habit))
                 conn.commit()
 
             # Flash
