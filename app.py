@@ -115,6 +115,11 @@ def login():
     # Forget any user_id
     session.clear()
 
+    # Redirect to register page if the user doesn't have an account
+    register = request.form.get("register")
+    if register:
+        return redirect("/register")
+
     # User reached route via POST (as by submitting a form via POST)
     if request.method == "POST":
 
@@ -174,21 +179,22 @@ def logout():
 def index():
     """ Homepage """
 
-    # create a list of Habit objects
-    habits = []
-
-    # Append habits list from database
-    conn = create_connection(database)
-    with conn:
-        cur = conn.cursor()
-        cur.execute("SELECT habit FROM habits")
-        rows = cur.fetchall()
-        for row in rows:
-            habits.append(Habit(row[0], len(habits) + 1, 0))
-
     # Create variables
     user_id = session["user_id"]
     today = date.today()
+
+    # create a list of Habit objects
+    habits = []
+
+    # Append habits list from database only for the current user
+
+    conn = create_connection(database)
+    with conn:
+        cur = conn.cursor()
+        cur.execute("SELECT habit FROM habits WHERE users_id = ?", (session["user_id"],))
+        rows = cur.fetchall()
+        for row in rows:
+            habits.append(Habit(row[0], len(habits) + 1, 0))
 
     # User reached route via POST (as by submitting a form via POST)
     if request.method == "POST":
@@ -309,7 +315,7 @@ def habits():
 
             # Flash
             flash("Habit deleted!")
-            alert_type = "alert-success"
+            alert_type = "alert-primary"
 
             # Update habits list
             habits.remove(delete_habit)

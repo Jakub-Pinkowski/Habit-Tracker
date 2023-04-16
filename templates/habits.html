@@ -6,6 +6,9 @@
 
 {% block main %}
 
+<!-- Modal -->
+
+
 
 <div class="d-flex flex-column flex-md-row p-4 gap-4 py-md-3 align-items-center justify-content-center">
     <div class="list-group">
@@ -35,19 +38,50 @@
     </div>
   </div>
 
-    <!-- Add new Habit-->
-    <div class="new_habit_container">
-        <form action="/habits" method="post">
-            <input type="text" name="new_habit" id="new_habit_input" required>
-            <button class="btn .btn-lg btn-outline-primary d-inline-flex align-items-center" id="new_habit_button" type="submit">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus-circle" viewBox="0 0 16 16">
-                    <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
-                    <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
-                </svg>
-                <span id="add_habit">
-                    Add Habit
-                </span> 
-            </button>
-        </form>
+<!-- Add new Habit-->
+<div class="new_habit_container">
+    <form action="/habits" method="post">
+        <input type="text" name="new_habit" id="new_habit_input" required>
+        <button class="btn .btn-lg btn-outline-primary d-inline-flex align-items-center" id="new_habit_button" type="submit">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus-circle" viewBox="0 0 16 16">
+                <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
+            </svg>
+            <span id="add_habit">
+                Add Habit
+            </span> 
+        </button>
+    </form>
+</div>
+
+
+<!-- Button trigger modal -->
+<button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
+    Launch demo modal
+</button>
+  
+  <!-- Modal -->
+  <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5" id="exampleModalLabel">Modal title</h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          Modal test
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-primary">Save changes</button>
+        </div>
+      </div>
     </div>
+  </div>
+
+
+
+
 {% endblock %}
+
+

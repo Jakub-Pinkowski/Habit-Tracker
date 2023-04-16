@@ -128,14 +128,18 @@ z-index: 1500;
     border: 1px solid;
     border-radius: 0.5rem;
     border-color: #6c757d;
-    padding: 1rem;
+    padding: 0.9rem;
 }
 
 #new_habit_button {
     border-radius: 0.5rem;
-    padding: 1rem;
+    padding: 0.9rem;
 }
 
 .habits-container {
     margin-top: 0.5rem;
+}
+
+#register_instead {
+    margin-top: 2rem;
 }
