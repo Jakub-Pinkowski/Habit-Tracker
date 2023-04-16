@@ -177,7 +177,6 @@ def index():
     # create a list of Habit objects
     habits = []
 
-
     # Append habits list from database
     conn = create_connection(database)
     with conn:
@@ -187,11 +186,9 @@ def index():
         for row in rows:
             habits.append(Habit(row[0], len(habits) + 1, 0))
 
-
     # Create variables
     user_id = session["user_id"]
     today = date.today()
-
 
     # User reached route via POST (as by submitting a form via POST)
     if request.method == "POST":
@@ -232,20 +229,17 @@ def index():
                         cur.execute("INSERT OR IGNORE INTO history (users_id, date, habit, value) VALUES(?, ?, ?, ?)", (user_id, today, habit_name, value))
                         conn.commit()
 
-
         # Count streak for each habit and update this value in the Habit object
         for habit in habits:
             streak = 0
             habit_name = habit.name
             habit_id = habit.id
-            user_id = session["user_id"]
             conn = create_connection(database)
             with conn:
                 cur = conn.cursor()
                 cur.execute("SELECT * FROM history WHERE users_id = ? AND habit = ? ORDER BY date DESC", (user_id, habit_name))
                 rows = cur.fetchall()
                 for row in rows:
-                    print(rows)
                     if row[2] == 1:
                         streak += 1
                     else:
@@ -269,7 +263,6 @@ def index():
                 cur.execute("SELECT * FROM history WHERE users_id = ? AND habit = ? ORDER BY date DESC", (user_id, habit_name))
                 rows = cur.fetchall()
                 for row in rows:
-                    print(rows)
                     if row[2] == 1:
                         streak += 1
                     else:
@@ -282,8 +275,6 @@ def index():
 @login_required
 def habits():
     """ Habits page """
-
-    # List all habits from database
 
     # User reached route via POST (as by submitting a form via POST)
     if request.method == "POST":
@@ -300,13 +291,8 @@ def habits():
                 habits.append(row[0])
 
         # Create variables for different forms
-        edit_habit = request.form.get("edit_habit")
         delete_habit = request.form.get("delete_habit")
-        print(delete_habit)
         new_habit = request.form.get("new_habit")
-
-        # Edit habit form 
-        if edit_habit:
 
         # Delete habit form
         if delete_habit:
@@ -329,10 +315,14 @@ def habits():
             # Redirect user to habits page
             return render_template("habits.html", alert_type=alert_type, habits=habits)
 
-
-
         # New habit form
         if new_habit:
+
+            # Check if the new habit is already in the habits list
+            if new_habit in habits:
+                flash("Habit already exists!")
+                alert_type = "alert-danger"
+                return render_template("habits.html", alert_type=alert_type, habits=habits)
 
             # Insert habit into database
             user_id = session["user_id"]
@@ -352,9 +342,6 @@ def habits():
             # Redirect user to habits page
             return render_template("habits.html", alert_type=alert_type, habits=habits)
         
-
-        
-
     # User reached route via GET (as by clicking a link or via redirect)
     habits = []
     user_id = session["user_id"]
@@ -366,7 +353,6 @@ def habits():
         for row in rows:
             habits.append(row[0])
     
-
     return render_template("habits.html", habits=habits)
 
 @app.route("/dashboard", methods=["GET", "POST"])
