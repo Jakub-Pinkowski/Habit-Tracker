@@ -135,3 +135,7 @@ z-index: 1500;
     border-radius: 0.5rem;
     padding: 1rem;
 }
+
+.habits-container {
+    margin-top: 0.5rem;
+}

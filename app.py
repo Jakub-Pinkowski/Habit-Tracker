@@ -288,9 +288,7 @@ def habits():
     # User reached route via POST (as by submitting a form via POST)
     if request.method == "POST":
 
-        # Get habit name from input field
-        habit = request.form.get("new_habit")
-
+        # List all habits from database
         habits = []
         user_id = session["user_id"]
         conn = create_connection(database)
@@ -301,38 +299,60 @@ def habits():
             for row in rows:
                 habits.append(row[0])
 
-        # Ensure habit was submitted
-        if not habit:
-            flash("Please provide habit!")
-            alert_type = "alert-danger"
+        # Create variables for different forms
+        edit_habit = request.form.get("edit_habit")
+        delete_habit = request.form.get("delete_habit")
+        print(delete_habit)
+        new_habit = request.form.get("new_habit")
+
+        # Edit habit form 
+        if edit_habit:
+
+        # Delete habit form
+        if delete_habit:
+
+            # Delete habit from database
+            user_id = session["user_id"]
+            conn = create_connection(database)
+            with conn:
+                cur = conn.cursor()
+                cur.execute("DELETE FROM habits WHERE users_id = ? AND habit = ?", (user_id, delete_habit))
+                conn.commit()
+
+            # Flash
+            flash("Habit deleted!")
+            alert_type = "alert-success"
+
+            # Update habits list
+            habits.remove(delete_habit)
+
+            # Redirect user to habits page
             return render_template("habits.html", alert_type=alert_type, habits=habits)
 
-        # Insert habit into database
-        user_id = session["user_id"]
-        conn = create_connection(database)
-        with conn:
-            cur = conn.cursor()
-            cur.execute("INSERT OR IGNORE INTO habits (users_id, habit) VALUES(?, ?)", (user_id, habit))
-            conn.commit()
 
-        # Flash
-        flash("Habit added!")
-        alert_type = "alert-success"
 
-        # Update habits list
-        habits = []
-        user_id = session["user_id"]
-        conn = create_connection(database)
-        with conn:
-            cur = conn.cursor()
-            cur.execute("SELECT habit FROM habits WHERE users_id = ?", (user_id,))
-            rows = cur.fetchall()
-            for row in rows:
-                habits.append(row[0])
+        # New habit form
+        if new_habit:
+
+            # Insert habit into database
+            user_id = session["user_id"]
+            conn = create_connection(database)
+            with conn:
+                cur = conn.cursor()
+                cur.execute("INSERT OR IGNORE INTO habits (users_id, habit) VALUES(?, ?)", (user_id, new_habit))
+                conn.commit()
+
+            # Flash
+            flash("Habit added!")
+            alert_type = "alert-success"
+
+            # Update habits list
+            habits.append(new_habit)
+            
+            # Redirect user to habits page
+            return render_template("habits.html", alert_type=alert_type, habits=habits)
         
 
-        # Redirect user to habits page
-        return render_template("habits.html", alert_type=alert_type, habits=habits)
         
 
     # User reached route via GET (as by clicking a link or via redirect)
