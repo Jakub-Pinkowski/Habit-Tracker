@@ -301,6 +301,7 @@ def habits():
         # Create variables for different forms
         delete_habit = request.form.get("delete_habit")
         new_habit = request.form.get("new_habit")
+        rename_habit = request.form.get("rename_habit")
 
         # Delete habit form
         if delete_habit:
@@ -349,6 +350,12 @@ def habits():
             
             # Redirect user to habits page
             return render_template("habits.html", alert_type=alert_type, habits=habits)
+        
+        # Rename habit form
+
+        
+
+
         
     # User reached route via GET (as by clicking a link or via redirect)
     habits = []

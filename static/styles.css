@@ -152,14 +152,13 @@ z-index: 1500;
 
 .dropdown-menu {
     width: 301px;
-    background-color: #2d3239;
-}
-
-.dropdown-item:hover {
-    background-color: #1b1e22;
 }
 
 #trash-dropdown {
     color: #dc3545;
+}
+
+.input-group {
+    padding: 1.5rem;
 }
 

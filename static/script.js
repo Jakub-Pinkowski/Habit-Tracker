@@ -22,7 +22,23 @@ document.addEventListener("DOMContentLoaded", function () {
         document.documentElement.setAttribute("data-bs-theme", "light");
     }
 
+    // Make "rename_input" autofocus when any modal is shown, not only the fist modal
     
+    // Loop through all modals
+    const modals = document.getElementsByClassName("modal");
+    for (let i = 0; i < modals.length; i++) {
+        const renameModal = modals[i];
+        // When modal is shown, focus on the input
+        renameModal.addEventListener("shown.bs.modal", function () {
+            const input = renameModal.querySelector(".rename-input");
+            if (input) {
+                input.focus();
+            }
+        });
+    }
+    
+
+
 });
 
 
