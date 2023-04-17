@@ -302,6 +302,7 @@ def habits():
         delete_habit = request.form.get("delete_habit")
         new_habit = request.form.get("new_habit")
         rename_habit = request.form.get("rename_habit")
+        old_habit_name = request.form.get("old_habit_name")
 
         # Delete habit form
         if delete_habit:
@@ -352,10 +353,32 @@ def habits():
             return render_template("habits.html", alert_type=alert_type, habits=habits)
         
         # Rename habit form
+        if rename_habit:
+            
+            # Check if the new habit is already in the habits list
+            if rename_habit in habits:
+                flash("Habit already exists!")
+                alert_type = "alert-danger"
+                return render_template("habits.html", alert_type=alert_type, habits=habits)
 
-        
+            # Update habit in database
+            user_id = session["user_id"]
+            conn = create_connection(database)
+            with conn:
+                cur = conn.cursor()
+                cur.execute("UPDATE habits SET habit = ? WHERE users_id = ? AND habit = ?", (rename_habit, user_id, old_habit_name))
+                conn.commit()
 
+            # Flash
+            flash("Habit renamed!")
+            alert_type = "alert-primary"
 
+            # Update habits list but keeping the same order
+            habits[habits.index(old_habit_name)] = rename_habit
+
+            # Redirect user to habits page
+            return render_template("habits.html", alert_type=alert_type, habits=habits)
+            
         
     # User reached route via GET (as by clicking a link or via redirect)
     habits = []
