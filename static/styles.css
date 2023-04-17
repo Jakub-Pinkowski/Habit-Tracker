@@ -134,6 +134,7 @@ z-index: 1500;
 
 #new_habit_button {
     border-radius: 0.5rem;
+    margin-left: 0.5rem;
     padding: 0.9rem;
 }
 
@@ -151,8 +152,14 @@ z-index: 1500;
 
 .dropdown-menu {
     width: 301px;
+    background-color: #2d3239;
+}
+
+.dropdown-item:hover {
+    background-color: #1b1e22;
 }
 
 #trash-dropdown {
     color: #dc3545;
 }
+
