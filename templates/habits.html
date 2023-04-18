@@ -49,21 +49,17 @@
                     <hr class="dropdown-divider">
                 </li>
                 <li>
-                    <form action="/habits" method="post" id="delete_button_dropdown">
-                        <input type="hidden" type="submit" name="delete_habit" id="{{ habit }}" value="{{ habit }}">
-                        <a class="dropdown-item d-flex gap-2 align-items-center" id="trash-dropdown" href="javascript:{}" onclick="document.getElementById('delete_button_dropdown').submit(); return false;">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="34" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16">
-                                <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5Zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5Zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6Z"/>
-                                <path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1ZM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118ZM2.5 3h11V2h-11v1Z"/>
-                            </svg>
-                            Delete
-                        </a>
-                    </form>
+                    <a class="dropdown-item d-flex gap-2 align-items-center" id="trash-dropdown" data-bs-toggle="modal" data-bs-target="#Modal3{{ loop.index }}" href="#">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="34" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16">
+                            <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5Zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5Zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6Z"/>
+                            <path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1ZM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118ZM2.5 3h11V2h-11v1Z"/>
+                        </svg>
+                        Delete
+                    </a>
                 </li>
               </ul>
             <form action="/habits" method="post">
-                <input type="hidden" name="delete_habit" id="{{ habit }}" value="{{ habit }}">
-                <button type="submit" class="btn btn-outline-danger habit-options trash">
+                <button type="button" class="btn btn-outline-danger habit-options trash" data-bs-toggle="modal" data-bs-target="#Modal3{{ loop.index }}">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="34" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16">
                         <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5Zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5Zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6Z"/>
                         <path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1ZM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118ZM2.5 3h11V2h-11v1Z"/>
@@ -108,6 +104,27 @@
                                 <button class="btn btn-primary" type="submit">Rename</button>
                             </div>
                         </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Delete Habit -->
+    <div class="modal fade rename-modal" id="Modal3{{ loop.index }}" tabindex="-1" aria-labelledby="ModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <form action="/habits" method="post">
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="ModalLabel"> {{ habit }}</h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        Are you sure you want to delete the habit?
+                        <input name="delete_habit" type="hidden" value="{{ habit }}">
+                    </div>
+                    <div class="modal-footer" id="delete-confirmation-footer">
+                        <button type="submit" class="btn btn-danger">Delete habit</button>
                     </div>
                 </form>
             </div>

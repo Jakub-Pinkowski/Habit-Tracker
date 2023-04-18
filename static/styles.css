@@ -162,3 +162,8 @@ z-index: 1500;
     padding: 1.5rem;
 }
 
+#delete-confirmation-footer {
+    border: none;
+    display: block;
+    align-items: center !important;
+}
