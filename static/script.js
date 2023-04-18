@@ -21,8 +21,6 @@ document.addEventListener("DOMContentLoaded", function () {
     } else {
         document.documentElement.setAttribute("data-bs-theme", "light");
     }
-
-    // Make "rename_input" autofocus when any modal is shown, not only the fist modal
     
     // Loop through all modals
     const modals = document.getElementsByClassName("modal");
@@ -38,9 +36,13 @@ document.addEventListener("DOMContentLoaded", function () {
     }
     
 
+    // Allow user to submit form by pressing enter
+    const deleteForm = document.getElementById("delete-form");
+    document.addEventListener("keyup", function(event) {
+        if (event.key === "Enter" && event.target.tagName !== "TEXTAREA") {
+          event.preventDefault();
+          deleteForm.submit();
+        }
+      });
 
 });
-
-
-
-

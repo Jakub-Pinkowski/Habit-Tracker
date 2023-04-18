@@ -13,7 +13,7 @@
             <a href="#" class="list-group-item list-group-item-action d-flex gap-3 py-3" data-bs-toggle="dropdown" aria-expanded="false" aria-current="true">
                 <div class="d-flex gap-2 w-100 justify-content-between">
                 <div>
-                    <h6 class="mb-0">{{ habit }}</h6>
+                    <h6 id="test" class="mb-0">{{ habit }}</h6>
                 </div>
                 </div>
             </a>
@@ -84,7 +84,7 @@
     <div class="modal fade rename-modal" id="Modaldelete{{ loop.index }}" tabindex="-1" aria-labelledby="ModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
-                <form action="/archive" method="post">
+                <form class="form" id="delete-form" action="/archive" method="post">
                     <div class="modal-header">
                         <h1 class="modal-title fs-5" id="ModalLabel"> {{ habit }}</h1>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
