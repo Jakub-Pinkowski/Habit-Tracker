@@ -401,7 +401,12 @@ def dashboard():
     return render_template("dashboard.html")
 
 
+@app.route("/archive", methods=["GET", "POST"])
+@login_required
+def archive():
+    """ Archive page """
 
+    return render_template("archive.html")
 
 
 
