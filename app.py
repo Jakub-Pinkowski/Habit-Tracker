@@ -287,71 +287,24 @@ def habits():
     # User reached route via POST (as by submitting a form via POST)
     if request.method == "POST":
 
-        # List all habits from database
+        # List all habits from database except for the archived habits
         habits = []
         user_id = session["user_id"]
         conn = create_connection(database)
         with conn:
             cur = conn.cursor()
-            cur.execute("SELECT habit FROM habits WHERE users_id = ?", (user_id,))
+            cur.execute("SELECT habit FROM habits WHERE users_id = ? AND archived = 0", (user_id,))
             rows = cur.fetchall()
             for row in rows:
                 habits.append(row[0])
 
         # Create variables for different forms
+        archive_habit = request.form.get("archive_habit")
         delete_habit = request.form.get("delete_habit")
         new_habit = request.form.get("new_habit")
         rename_habit = request.form.get("rename_habit")
         old_habit_name = request.form.get("old_habit_name")
 
-        # Delete habit form
-        if delete_habit:
-
-            # Delete habit from database
-            user_id = session["user_id"]
-            conn = create_connection(database)
-            with conn:
-                cur = conn.cursor()
-                cur.execute("DELETE FROM habits WHERE users_id = ? AND habit = ?", (user_id, delete_habit))
-                conn.commit()
-
-            # Flash
-            flash("Habit deleted!")
-            alert_type = "alert-primary"
-
-            # Update habits list
-            habits.remove(delete_habit)
-
-            # Redirect user to habits page
-            return render_template("habits.html", alert_type=alert_type, habits=habits)
-
-        # New habit form
-        if new_habit:
-
-            # Check if the new habit is already in the habits list
-            if new_habit in habits:
-                flash("Habit already exists!")
-                alert_type = "alert-danger"
-                return render_template("habits.html", alert_type=alert_type, habits=habits)
-
-            # Insert habit into database
-            user_id = session["user_id"]
-            conn = create_connection(database)
-            with conn:
-                cur = conn.cursor()
-                cur.execute("INSERT OR IGNORE INTO habits (users_id, habit) VALUES(?, ?)", (user_id, new_habit))
-                conn.commit()
-
-            # Flash
-            flash("Habit added!")
-            alert_type = "alert-primary"
-
-            # Update habits list
-            habits.append(new_habit)
-            
-            # Redirect user to habits page
-            return render_template("habits.html", alert_type=alert_type, habits=habits)
-        
         # Rename habit form
         if rename_habit:
             
@@ -378,15 +331,85 @@ def habits():
 
             # Redirect user to habits page
             return render_template("habits.html", alert_type=alert_type, habits=habits)
+        
+        #Archive habit form
+        if archive_habit:
+
+            # Archive habit in database
+            user_id = session["user_id"]
+            conn = create_connection(database)
+            with conn:
+                cur = conn.cursor()
+                cur.execute("UPDATE habits SET archived = 1 WHERE users_id = ? AND habit = ?", (user_id, archive_habit))
+                conn.commit()
+
+            # Flash
+            flash("Habit archived!")
+            alert_type = "alert-primary"
+
+            # Update habits list but keeping the same order
+            habits.remove(archive_habit)
+
+            # Redirect user to habits page
+            return render_template("habits.html", alert_type=alert_type, habits=habits)
+
+        # Delete habit form
+        if delete_habit:
+
+            # Delete habit from database
+            user_id = session["user_id"]
+            conn = create_connection(database)
+            with conn:
+                cur = conn.cursor()
+                cur.execute("DELETE FROM habits WHERE users_id = ? AND habit = ?", (user_id, delete_habit))
+                conn.commit()
+
+            # Flash
+            flash("Habit deleted!")
+            alert_type = "alert-primary"
+
+            # Update habits list
+            habits.remove(delete_habit)
+
+            # Redirect user to habits page
+            return render_template("habits.html", alert_type=alert_type, habits=habits)
+        
+        # New habit form
+        if new_habit:
+
+            # Check if the new habit is already in the habits list
+            if new_habit in habits:
+                flash("Habit already exists!")
+                alert_type = "alert-danger"
+                return render_template("habits.html", alert_type=alert_type, habits=habits)
+
+            # Insert habit into database
+            user_id = session["user_id"]
+            conn = create_connection(database)
+            with conn:
+                cur = conn.cursor()
+                cur.execute("INSERT OR IGNORE INTO habits (users_id, habit) VALUES(?, ?)", (user_id, new_habit))
+                conn.commit()
+
+            # Flash
+            flash("Habit added!")
+            alert_type = "alert-primary"
+
+            # Update habits list
+            habits.append(new_habit)
+            
+            # Redirect user to habits page
+            return render_template("habits.html", alert_type=alert_type, habits=habits)
             
         
     # User reached route via GET (as by clicking a link or via redirect)
+    # List all habits from database except for the archived habits
     habits = []
     user_id = session["user_id"]
     conn = create_connection(database)
     with conn:
         cur = conn.cursor()
-        cur.execute("SELECT habit FROM habits WHERE users_id = ?", (user_id,))
+        cur.execute("SELECT habit FROM habits WHERE users_id = ? AND archived = 0", (user_id,))
         rows = cur.fetchall()
         for row in rows:
             habits.append(row[0])
@@ -406,7 +429,79 @@ def dashboard():
 def archive():
     """ Archive page """
 
-    return render_template("archive.html")
+    # User reached route via POST (as by submitting a form via POST)
+    if request.method == "POST":
+        
+        # List all the archived habits from database
+        habits = []
+        user_id = session["user_id"]
+        conn = create_connection(database)
+        with conn:
+            cur = conn.cursor()
+            cur.execute("SELECT habit FROM habits WHERE users_id = ? AND archived = 1", (user_id,))
+            rows = cur.fetchall()
+            for row in rows:
+                habits.append(row[0])
+
+        restore_habit = request.form.get("restore_habit")
+        delete_habit = request.form.get("delete_habit")
+
+        # Restore habit form
+        if restore_habit:
+
+            # Restore habit in database
+            user_id = session["user_id"]
+            conn = create_connection(database)
+            with conn:
+                cur = conn.cursor()
+                cur.execute("UPDATE habits SET archived = 0 WHERE users_id = ? AND habit = ?", (user_id, restore_habit))
+                conn.commit()
+
+            # Flash
+            flash("Habit restored!")
+            alert_type = "alert-primary"
+
+            # Update habits list but keeping the same order
+            habits.remove(restore_habit)
+
+            # Redirect user to habits page
+            return render_template("archive.html", alert_type=alert_type, habits=habits)
+
+        # Delete habit form
+        if delete_habit:
+
+            # Delete habit from database
+            user_id = session["user_id"]
+            conn = create_connection(database)
+            with conn:
+                cur = conn.cursor()
+                cur.execute("DELETE FROM habits WHERE users_id = ? AND habit = ?", (user_id, delete_habit))
+                conn.commit()
+
+            # Flash
+            flash("Habit deleted!")
+            alert_type = "alert-primary"
+
+            # Update habits list
+            habits.remove(delete_habit)
+
+            # Redirect user to habits page
+            return render_template("archive.html", alert_type=alert_type, habits=habits)
+
+    # User reached route via GET (as by clicking a link or via redirect)
+    # List all the archived habits from database
+    habits = []
+    user_id = session["user_id"]
+    conn = create_connection(database)
+    with conn:
+        cur = conn.cursor()
+        cur.execute("SELECT habit FROM habits WHERE users_id = ? AND archived = 1", (user_id,))
+        rows = cur.fetchall()
+        for row in rows:
+            habits.append(row[0])
+    
+    return render_template("archive.html", habits=habits)
+                           
 
 
 

@@ -5,5 +5,110 @@
 {% endblock %}
 
 {% block main %}
-    Hey, Archive!
+<div class="d-flex flex-column flex-md-row p-4 gap-4 py-md-3 align-items-center justify-content-center">
+    <div class="list-group">
+
+    {% for habit in habits %}
+        <div class="d-flex habits-container">
+            <a href="#" class="list-group-item list-group-item-action d-flex gap-3 py-3" data-bs-toggle="dropdown" aria-expanded="false" aria-current="true">
+                <div class="d-flex gap-2 w-100 justify-content-between">
+                <div>
+                    <h6 class="mb-0">{{ habit }}</h6>
+                </div>
+                </div>
+            </a>
+            <ul class="dropdown-menu">
+                <li>
+                    <a class="dropdown-item d-flex gap-2 align-items-center" data-bs-toggle="modal" data-bs-target="#Modalrestore{{ loop.index }}" href="#">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-counterclockwise" viewBox="0 0 16 16">
+                            <path fill-rule="evenodd" d="M8 3a5 5 0 1 1-4.546 2.914.5.5 0 0 0-.908-.417A6 6 0 1 0 8 2v1z"/>
+                            <path d="M8 4.466V.534a.25.25 0 0 0-.41-.192L5.23 2.308a.25.25 0 0 0 0 .384l2.36 1.966A.25.25 0 0 0 8 4.466z"/>
+                        </svg>
+                        Restore
+                    </a>
+                </li>
+                <li>
+                    <hr class="dropdown-divider">
+                </li>
+                <li>
+                    <a class="dropdown-item d-flex gap-2 align-items-center" id="trash-dropdown" data-bs-toggle="modal" data-bs-target="#Modaldelete{{ loop.index }}" href="#">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="34" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16">
+                            <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5Zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5Zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6Z"/>
+                            <path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1ZM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118ZM2.5 3h11V2h-11v1Z"/>
+                        </svg>
+                        Delete
+                    </a>
+                </li>
+              </ul>
+            <form action="/habits" method="post">
+                <button type="button" class="btn btn-outline-primary habit-options trash" data-bs-toggle="modal" data-bs-target="#Modalrestore{{ loop.index }}">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="34" fill="currentColor" class="bi bi-arrow-counterclockwise" viewBox="0 0 16 16">
+                        <path fill-rule="evenodd" d="M8 3a5 5 0 1 1-4.546 2.914.5.5 0 0 0-.908-.417A6 6 0 1 0 8 2v1z"/>
+                        <path d="M8 4.466V.534a.25.25 0 0 0-.41-.192L5.23 2.308a.25.25 0 0 0 0 .384l2.36 1.966A.25.25 0 0 0 8 4.466z"/>
+                    </svg>
+                </button>
+            </form>  
+            <form action="/habits" method="post">
+                <button type="button" class="btn btn-outline-danger habit-options trash" data-bs-toggle="modal" data-bs-target="#Modaldelete{{ loop.index }}">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="34" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16">
+                        <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5Zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5Zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6Z"/>
+                        <path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1ZM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118ZM2.5 3h11V2h-11v1Z"/>
+                    </svg>
+                </button>
+            </form>
+        </div>
+
+    <!-- Modal Restore Habit -->
+    <div class="modal fade rename-modal" id="Modalrestore{{ loop.index }}" tabindex="-1" aria-labelledby="ModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <form action="/archive" method="post">
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="ModalLabel"> {{ habit }}</h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        Are you sure you want to restore the habit?
+                        <input name="restore_habit" type="hidden" value="{{ habit }}">
+                    </div>
+                    <div class="modal-footer confirmation-footer">
+                        <button type="submit" class="btn btn-primary">Restore habit</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Modal Delete Habit -->
+    <div class="modal fade rename-modal" id="Modaldelete{{ loop.index }}" tabindex="-1" aria-labelledby="ModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <form action="/archive" method="post">
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="ModalLabel"> {{ habit }}</h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body delete-modal-body">
+                        Are you sure you want to delete the habit?
+                        <input name="delete_habit" type="hidden" value="{{ habit }}">
+                    </div>
+                    <div class="modal-footer confirmation-footer">
+                        <button type="submit" class="btn btn-danger">Delete habit</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+      {% endfor %}
+
+    </div>
+</div>
+
+
+
+
+
+
 {% endblock %}

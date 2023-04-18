@@ -159,11 +159,21 @@ z-index: 1500;
 }
 
 .input-group {
-    padding: 1.5rem;
+    padding-top: 1.5rem;
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
 }
 
-#delete-confirmation-footer {
+.confirmation-footer {
     border: none;
     display: block;
     align-items: center !important;
+}
+
+#rename_input {
+    border-radius: 0.5rem;;
+}
+
+.delete-modal-body {
+    padding-top: 2.5rem;
 }
