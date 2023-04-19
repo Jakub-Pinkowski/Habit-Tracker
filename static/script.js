@@ -35,14 +35,4 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
     
-
-    // Allow user to submit form by pressing enter
-    const deleteForm = document.getElementById("delete-form");
-    document.addEventListener("keyup", function(event) {
-        if (event.key === "Enter" && event.target.tagName !== "TEXTAREA") {
-          event.preventDefault();
-          deleteForm.submit();
-        }
-      });
-
 });
