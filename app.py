@@ -3,7 +3,7 @@ from sqlite3 import Error
 from flask import Flask, flash, redirect, render_template, request, session
 from flask_session import Session
 from werkzeug.security import check_password_hash, generate_password_hash
-from datetime import date
+from datetime import date, datetime
 
 from helpers import apology, login_required, Habit
 
@@ -186,12 +186,14 @@ def index():
     # create a list of Habit objects
     habits = []
 
-    # Append habits list from database only for the current user
+    # Append only unarchived habits list from database only for the current user 
+
+
 
     conn = create_connection(database)
     with conn:
         cur = conn.cursor()
-        cur.execute("SELECT habit FROM habits WHERE users_id = ?", (session["user_id"],))
+        cur.execute("SELECT habit FROM habits WHERE users_id = ? AND archived = 0", (user_id,))
         rows = cur.fetchall()
         for row in rows:
             habits.append(Habit(row[0], len(habits) + 1, 0))
@@ -501,9 +503,21 @@ def archive():
             habits.append(row[0])
     
     return render_template("archive.html", habits=habits)
-                           
+                        
+# TODO
+@app.route('/save_date', methods=['POST'])
+def save_date():
+    # Get the selected date from the request form
+    selected_date = request.form.get('formattedDate')
 
+    # Convert the date string to a datetime object
+    date_obj = datetime.strptime(selected_date, '%Y-%m-%d')
 
+    # Format the date as a string in YYYY-MM-DD format
+    formatted_date = date_obj.strftime('%Y-%m-%d')
+    # Do something with selected_date
+    print(selected_date)
+    return 'Received selected date: ' + selected_date
 
 
 main()
