@@ -506,4 +506,21 @@ def archive():
                         
 
 
+# Testing
+
+
+
+
+@app.route('/process-date', methods=['POST'])
+def process_date():
+    """ Process the selected date """
+
+    formattedDate = request.json['formattedDate']
+    print(formattedDate)
+    # Do something with the selected date here...
+    return redirect("/archive")
+
+
+
+
 main()

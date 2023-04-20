@@ -51,15 +51,6 @@ document.addEventListener("DOMContentLoaded", function () {
     const weekdaysDiv = document.querySelector('.cal-weekdays');
     const daysDiv = document.querySelector('.cal-days');
 
-
-    
-
-
-
-
-
-
-    
     let currentDate = new Date();
     let currentMonth = currentDate.getMonth();
     let currentYear = currentDate.getFullYear();
@@ -109,9 +100,42 @@ document.addEventListener("DOMContentLoaded", function () {
             const year = currentYear;
             const selectedDate = new Date(year, monthIndex, day);
             console.log(selectedDate);
+
+            
+            // TESTING
+            const newDate = new Date(selectedDate);
+            const newYear = newDate.getFullYear();
+            const newMonth = String(newDate.getMonth() + 1).padStart(2, '0');
+            const newDay = String(newDate.getDate()).padStart(2, '0');
+            const formattedDate = `${newYear}-${newMonth}-${newDay}`;
+            console.log(formattedDate);
+
+
+
+
+
+
+            if (formattedDate) {
+                // Send the selected date to the Flask backend using AJAX
+                const xhr = new XMLHttpRequest();
+                const url = '/process-date';
+                const data = JSON.stringify({formattedDate: formattedDate});
+                xhr.open('POST', url, true);
+                xhr.setRequestHeader('Content-Type', 'application/json;charset=UTF-8');
+                xhr.onload = function() {
+                    if (xhr.status === 200) {
+                        console.log('Date processed successfully');
+                    } else {
+                        console.log('Error processing date');
+                    }
+                };
+                xhr.send(data);
+            }
             });
         });
         
+        
+
     }
       
     prevMonthBtn.addEventListener('click', () => {
@@ -136,8 +160,4 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
 
-
-
-       
-    
 });
