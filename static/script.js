@@ -50,6 +50,15 @@ document.addEventListener("DOMContentLoaded", function () {
     const monthNameSpan = document.querySelector('.cal-month-name');
     const weekdaysDiv = document.querySelector('.cal-weekdays');
     const daysDiv = document.querySelector('.cal-days');
+
+
+    
+
+
+
+
+
+
     
     let currentDate = new Date();
     let currentMonth = currentDate.getMonth();
@@ -73,12 +82,14 @@ document.addEventListener("DOMContentLoaded", function () {
             weekdayDiv.textContent = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][i];
             weekdaysDiv.appendChild(weekdayDiv);
         }
+
         const firstDayOfMonth = getFirstDayOfMonth(currentMonth, currentYear);
         for (let i = 0; i < firstDayOfMonth; i++) {
             const emptyDayBtn = document.createElement('button');
             emptyDayBtn.classList.add('btn', 'cal-btn', 'invisible');
             daysDiv.appendChild(emptyDayBtn);
         }
+
         const daysInCurrentMonth = daysInMonth(currentMonth, currentYear);
         for (let i = 1; i <= daysInCurrentMonth; i++) {
             const dayBtn = document.createElement('button');
@@ -86,6 +97,21 @@ document.addEventListener("DOMContentLoaded", function () {
             dayBtn.textContent = i;
             daysDiv.appendChild(dayBtn);
         }
+    
+        let selectedDate;
+
+        // Add a click event listener to each of the day buttons
+        const dayButtons = daysDiv.querySelectorAll('button');
+        dayButtons.forEach(button => {
+            button.addEventListener('click', () => {
+            const day = button.textContent;
+            const monthIndex = currentMonth;
+            const year = currentYear;
+            const selectedDate = new Date(year, monthIndex, day);
+            console.log(selectedDate);
+            });
+        });
+        
     }
       
     prevMonthBtn.addEventListener('click', () => {
@@ -112,58 +138,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
 
-
-    // TODO
-    // Save the selected date to a variable
-    // Get the calendar element
-    const calendar = document.querySelector(".cal");
-
-    // Function to format the date as YYYY-MM-DD
-    function formatDate(date) {
-        const year = date.getFullYear();
-        const month = (date.getMonth() + 1).toString().padStart(2, "0");
-        const day = date.getDate().toString().padStart(2, "0");
-        return `${year}-${month}-${day}`;
-    }
-
-    // Function to handle click events on calendar buttons
-    function handleClick(event) {
-        // get the clicked element
-        const element = event.target;
-        // check if the clicked element is a calendar button
-        if (element.classList.contains("cal-btn")) {
-            // get the date from the data-date attribute
-            const date = new Date(element.dataset.date);
-            console.log(date);
-            // format the date
-            const formattedDate = formatDate(date);
-            console.log(formattedDate);
-        }
-
-
-        // send the formatted date to the Flask backend using AJAX
-        const xhr = new XMLHttpRequest();
-        xhr.open("POST", "/save_date", true);
-        xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-        xhr.onreadystatechange = function() {
-            if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
-            console.log(xhr.responseText); // for testing
-            }
-        };
-        xhr.send(JSON.stringify({ date: formattedDate }));
-    }
-    
-
-    function save_date() {
-        var date = document.getElementById("date").value;
-        console.log(date);
-        var xhr = new XMLHttpRequest();
-        xhr.open("POST", "/save_date", true);
-        xhr.setRequestHeader("Content-Type", "application/json");
-        xhr.send(JSON.stringify({"date": "{{ formatted_date }}"}));
-      }
-    
-    // Add click event listener to calendar element
-    calendar.addEventListener("click", handleClick);
+       
     
 });

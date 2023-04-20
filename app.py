@@ -504,20 +504,6 @@ def archive():
     
     return render_template("archive.html", habits=habits)
                         
-# TODO
-@app.route('/save_date', methods=['POST'])
-def save_date():
-    # Get the selected date from the request form
-    selected_date = request.form.get('formattedDate')
-
-    # Convert the date string to a datetime object
-    date_obj = datetime.strptime(selected_date, '%Y-%m-%d')
-
-    # Format the date as a string in YYYY-MM-DD format
-    formatted_date = date_obj.strftime('%Y-%m-%d')
-    # Do something with selected_date
-    print(selected_date)
-    return 'Received selected date: ' + selected_date
 
 
 main()
