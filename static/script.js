@@ -99,8 +99,6 @@ document.addEventListener("DOMContentLoaded", function () {
             const monthIndex = currentMonth;
             const year = currentYear;
             const selectedDate = new Date(year, monthIndex, day);
-            console.log(selectedDate);
-
             
             // TESTING
             const newDate = new Date(selectedDate);
@@ -118,21 +116,22 @@ document.addEventListener("DOMContentLoaded", function () {
             if (formattedDate) {
                 // Send the selected date to the Flask backend using AJAX
                 const xhr = new XMLHttpRequest();
-                const url = '/process-date';
-                const data = JSON.stringify({formattedDate: formattedDate});
+                const url = '/dashboard';
+                const data = formattedDate;
                 xhr.open('POST', url, true);
-                xhr.setRequestHeader('Content-Type', 'application/json;charset=UTF-8');
+                xhr.setRequestHeader('Content-Type', 'text/plain');
                 xhr.onload = function() {
-                    if (xhr.status === 200) {
-                        console.log('Date processed successfully');
-                    } else {
-                        console.log('Error processing date');
-                    }
+                  if (xhr.status === 200) {
+                    console.log('Date processed successfully');
+                  } else {
+                    console.log('Error processing date');
+                  }
                 };
+                console.log(data)
                 xhr.send(data);
-            }
+              }
             });
-        });
+          });
         
         
 

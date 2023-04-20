@@ -92,6 +92,22 @@
     <div id="current-entry">
         <h3>Current entry:</h3>
     </div>
+    <div id="current-date">
+        <h3>Picked date:</h3>
+        {% if pickedDate %}
+            {{ pickedDate }}
+        {% else %}
+            Please pick a date.
+        {% endif %}
+    </div>
+    <div id="current-date">
+        <h3>string date:</h3>
+        {% if stringDate %}
+            {{ stringDate }}
+        {% else %}
+            Please pick a date.
+        {% endif %}
+    </div>
     <div>
         <h3>Change to:</h3>
     </div>

@@ -1,6 +1,6 @@
 import sqlite3
 from sqlite3 import Error
-from flask import Flask, flash, redirect, render_template, request, session
+from flask import Flask, flash, redirect, render_template, request, session, url_for
 from flask_session import Session
 from werkzeug.security import check_password_hash, generate_password_hash
 from datetime import date, datetime
@@ -23,6 +23,10 @@ app = Flask(__name__)
 app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
+
+# Global variables
+formattedDate = None
+
 
 
 # Databeses functions
@@ -423,7 +427,21 @@ def habits():
 def dashboard():
     """ Dashboard page """
 
-    return render_template("dashboard.html")
+    # Get picked date from Javascript
+    pickedDate = request.data.decode('utf-8')
+    print(pickedDate)
+    stringDate = str(pickedDate)
+    print(stringDate)
+
+
+    # User reached route via POST (as by submitting a form via POST)
+    if request.method == "POST": 
+        return render_template("dashboard.html", pickedDate=pickedDate, stringDate=stringDate)
+
+    # User reached route via GET (as by clicking a link or via redirect)
+    else:
+        pickedDate = request.data.decode('utf-8')
+        return render_template("dashboard.html", pickedDate=pickedDate, stringDate=stringDate)
 
 
 @app.route("/archive", methods=["GET", "POST"])
@@ -505,20 +523,15 @@ def archive():
     return render_template("archive.html", habits=habits)
                         
 
-
-# Testing
-
-
-
-
+# Get the date from the calendar
 @app.route('/process-date', methods=['POST'])
 def process_date():
     """ Process the selected date """
-
+    
     formattedDate = request.json['formattedDate']
-    print(formattedDate)
+
     # Do something with the selected date here...
-    return redirect("/archive")
+    return redirect("/dashboard")
 
 
 
