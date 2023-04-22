@@ -456,7 +456,6 @@ def dashboard():
         else:
             currentEntry = ""
 
-
     # User reached route via POST (as by submitting a form via POST)
     if request.method == "POST": 
         return render_template("dashboard.html", habit=habit, stringDate=stringDate, currentEntry=currentEntry)
@@ -545,6 +544,8 @@ def archive():
     return render_template("archive.html", habits=habits)
                         
 
+# Generate data for SSE
+# It's only updating currentRtry foer picked date for now
 def generate_data():
     while True:
         yield f"data: {currentEntry}\n\n"
