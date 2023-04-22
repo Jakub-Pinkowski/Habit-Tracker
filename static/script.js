@@ -89,8 +89,6 @@ document.addEventListener("DOMContentLoaded", function () {
             daysDiv.appendChild(dayBtn);
         }
     
-        let selectedDate;
-
         // Add a click event listener to each of the day buttons
         const dayButtons = daysDiv.querySelectorAll('button');
         dayButtons.forEach(button => {
@@ -108,12 +106,13 @@ document.addEventListener("DOMContentLoaded", function () {
             const formattedDate = `${newYear}-${newMonth}-${newDay}`;
             console.log(formattedDate);
 
-
-
-
-
-
             if (formattedDate) {
+
+                // TESTING
+                const currentDateDiv = document.getElementById('current-date');
+                const dateHeading = currentDateDiv.querySelector('h3');
+                const dateString = currentDateDiv.querySelector('span');
+
                 // Send the selected date to the Flask backend using AJAX
                 const xhr = new XMLHttpRequest();
                 const url = '/dashboard';
@@ -122,6 +121,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 xhr.setRequestHeader('Content-Type', 'text/plain');
                 xhr.onload = function() {
                   if (xhr.status === 200) {
+                    dateString.textContent = formattedDate;
                     console.log('Date processed successfully');
                   } else {
                     console.log('Error processing date');

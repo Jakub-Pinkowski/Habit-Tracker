@@ -429,19 +429,23 @@ def dashboard():
 
     # Get picked date from Javascript
     pickedDate = request.data.decode('utf-8')
-    print(pickedDate)
+    if pickedDate:
+        pickedDate = datetime.strptime(pickedDate, '%Y-%m-%d').date()
+    else:
+        pickedDate = datetime.now().date()  # Set default value to current date
+    stringDate = str(pickedDate)
+    # Convert picked date to string
     stringDate = str(pickedDate)
     print(stringDate)
 
 
     # User reached route via POST (as by submitting a form via POST)
     if request.method == "POST": 
-        return render_template("dashboard.html", pickedDate=pickedDate, stringDate=stringDate)
+        return render_template("dashboard.html", stringDate=stringDate)
 
     # User reached route via GET (as by clicking a link or via redirect)
-    else:
-        pickedDate = request.data.decode('utf-8')
-        return render_template("dashboard.html", pickedDate=pickedDate, stringDate=stringDate)
+    
+    return render_template("dashboard.html", stringDate=stringDate)
 
 
 @app.route("/archive", methods=["GET", "POST"])
@@ -522,17 +526,6 @@ def archive():
     
     return render_template("archive.html", habits=habits)
                         
-
-# Get the date from the calendar
-@app.route('/process-date', methods=['POST'])
-def process_date():
-    """ Process the selected date """
-    
-    formattedDate = request.json['formattedDate']
-
-    # Do something with the selected date here...
-    return redirect("/dashboard")
-
 
 
 

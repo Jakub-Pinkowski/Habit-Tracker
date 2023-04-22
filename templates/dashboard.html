@@ -93,20 +93,8 @@
         <h3>Current entry:</h3>
     </div>
     <div id="current-date">
-        <h3>Picked date:</h3>
-        {% if pickedDate %}
-            {{ pickedDate }}
-        {% else %}
-            Please pick a date.
-        {% endif %}
-    </div>
-    <div id="current-date">
-        <h3>string date:</h3>
-        {% if stringDate %}
-            {{ stringDate }}
-        {% else %}
-            Please pick a date.
-        {% endif %}
+        <h3>Date:</h3>
+            <span>{{ stringDate }}</span>
     </div>
     <div>
         <h3>Change to:</h3>
@@ -121,5 +109,4 @@
         Missed
     </button>
 </div>
-
 {% endblock %}
