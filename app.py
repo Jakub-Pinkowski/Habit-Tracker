@@ -1,10 +1,10 @@
 import sqlite3
 from sqlite3 import Error
-from flask import Flask, flash, redirect, render_template, request, session, url_for
+from flask import Flask, flash, redirect, render_template, request, session, url_for, jsonify, Response
 from flask_session import Session
 from werkzeug.security import check_password_hash, generate_password_hash
 from datetime import date, datetime
-
+import time
 from helpers import apology, login_required, Habit
 
 
@@ -438,7 +438,8 @@ def dashboard():
         pickedDate = datetime.now().date()  # Set default value to current date
     # Convert picked date to string
     stringDate = str(pickedDate)
-    print(stringDate)
+    # Print picked date
+    print(f"stringDate: {stringDate}")
 
     # Get current entry for habit from database fromk table "history" for the picked date
     user_id = session["user_id"]
@@ -447,6 +448,7 @@ def dashboard():
         cur = conn.cursor()
         cur.execute("SELECT value FROM history WHERE users_id = ? AND habit = ? AND date = ?", (user_id, habit, stringDate))
         print(stringDate)
+        global currentEntry
         currentEntry = cur.fetchone()
         print(currentEntry) # This is fine, but HTML is not rendering it, it only renderes initial value
         if currentEntry:
@@ -457,11 +459,11 @@ def dashboard():
 
     # User reached route via POST (as by submitting a form via POST)
     if request.method == "POST": 
-        return render_template("dashboard.html", stringDate=stringDate, currentEntry=currentEntry)
+        return render_template("dashboard.html", habit=habit, stringDate=stringDate, currentEntry=currentEntry)
 
     # User reached route via GET (as by clicking a link or via redirect)
     
-    return render_template("dashboard.html", stringDate=stringDate, currentEntry=currentEntry)
+    return render_template("dashboard.html", habit=habit, stringDate=stringDate, currentEntry=currentEntry)
 
 
 @app.route("/archive", methods=["GET", "POST"])
@@ -543,6 +545,13 @@ def archive():
     return render_template("archive.html", habits=habits)
                         
 
+def generate_data():
+    while True:
+        yield f"data: {currentEntry}\n\n"
+        time.sleep(0.0001)
 
+@app.route('/data')
+def data():
+    return Response(generate_data(), mimetype='text/event-stream')
 
 main()
