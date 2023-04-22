@@ -427,25 +427,41 @@ def habits():
 def dashboard():
     """ Dashboard page """
 
+    # TESTING FOR RANDOM HABIT
+    habit = "Habit 3"
+
     # Get picked date from Javascript
     pickedDate = request.data.decode('utf-8')
     if pickedDate:
         pickedDate = datetime.strptime(pickedDate, '%Y-%m-%d').date()
     else:
         pickedDate = datetime.now().date()  # Set default value to current date
-    stringDate = str(pickedDate)
     # Convert picked date to string
     stringDate = str(pickedDate)
     print(stringDate)
 
+    # Get current entry for habit from database fromk table "history" for the picked date
+    user_id = session["user_id"]
+    conn = create_connection(database)
+    with conn:
+        cur = conn.cursor()
+        cur.execute("SELECT value FROM history WHERE users_id = ? AND habit = ? AND date = ?", (user_id, habit, stringDate))
+        print(stringDate)
+        currentEntry = cur.fetchone()
+        print(currentEntry) # This is fine, but HTML is not rendering it, it only renderes initial value
+        if currentEntry:
+            currentEntry = currentEntry[0]
+        else:
+            currentEntry = ""
+
 
     # User reached route via POST (as by submitting a form via POST)
     if request.method == "POST": 
-        return render_template("dashboard.html", stringDate=stringDate)
+        return render_template("dashboard.html", stringDate=stringDate, currentEntry=currentEntry)
 
     # User reached route via GET (as by clicking a link or via redirect)
     
-    return render_template("dashboard.html", stringDate=stringDate)
+    return render_template("dashboard.html", stringDate=stringDate, currentEntry=currentEntry)
 
 
 @app.route("/archive", methods=["GET", "POST"])
