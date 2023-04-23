@@ -102,9 +102,9 @@
     <div>
         <form action="/dashboard" method="post">
             <h3>Change to:</h3>
-                <input type="submit" name="change_entry" value="1">
-                <input type="submit" name="change_entry" value="Empty">
-                <input type="submit" name="change_entry" value="-1">
+                <input class="btn btn-success rounded-pill px-3" type="submit" name="change_entry" value="Done">
+                <input class="btn btn-secondary rounded-pill px-3" type="submit" name="change_entry" value="Empty">
+                <input class="btn btn-danger rounded-pill px-3" type="submit" name="change_entry" value="Missed">
         </form>
     </div>
     
@@ -199,12 +199,12 @@
                 xhr.onload = function() {
                   if (xhr.status === 200) {
                     dateSpan.textContent = formattedDate;
-                    console.log('Date processed successfully');
+                    // Log to console that data was sent successfully and log the data itself
+                    console.log('Data sent successfully, data is: ' + data);
                   } else {
                     console.log('Error processing date');
                   }
                 };
-                console.log(data)
                 xhr.send(data);
               }
             });

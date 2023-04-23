@@ -479,6 +479,13 @@ def dashboard():
 
         if change_entry:
 
+            if change_entry == "Done":
+                change_entry = 1
+            elif change_entry == "Missed":
+                change_entry = -1
+            elif change_entry == "Empty":
+                change_entry = 0
+
             # Update  entry in database
             # Check if there is already any entry for the picked date for the current user for the habit
             user_id = session["user_id"]
