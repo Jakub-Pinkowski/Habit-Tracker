@@ -259,4 +259,13 @@ z-index: 1500;
   .main_container_dashboard {
     flex-direction: column;
   }
+  /* Recude padding for all divs inside "change_entries" */
+  .p-4 {
+    padding: 0.2rem !important;
+  }
+}
+
+.main_container_dashboard span {
+    font-size: 1.3rem;
+    font-weight: 500;
 }
