@@ -446,6 +446,12 @@ def dashboard():
         # Store the value of pickedDate in the session
         session["pickedDate"] = pickedDate
 
+        # Make sure that the picked date is not in the future
+        if pickedDate > datetime.now().date():
+            flash("Date cannot be in the future!")
+            alert_type = "alert-danger"
+            return render_template("dashboard.html", alert_type=alert_type, habit=habit)
+
         # Convert picked date to string
         stringDate = str(pickedDate)
 
