@@ -281,3 +281,8 @@ z-index: 1500;
 .empty {
   color: #6c757d;
 }
+
+.selected {
+  border-radius: 0.5rem;
+  border: 2px solid #b3b6bd;
+}

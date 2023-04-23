@@ -295,7 +295,18 @@
     }
 </script>
 
+<!-- Make border over currently picked date in the calendar -->
 <script>
-    
+    const dayButtons = daysDiv.querySelectorAll('button');
+    dayButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            dayButtons.forEach(button => {
+                button.classList.remove('selected');
+            });
+            button.classList.add('selected');
+        });
+    });
+
+    // Add a click event listener to each of the day buttons
 </script>
 {% endblock %}
