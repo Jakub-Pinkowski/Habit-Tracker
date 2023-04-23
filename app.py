@@ -438,8 +438,6 @@ def dashboard():
         pickedDate = datetime.now().date()  # Set default value to current date
     # Convert picked date to string
     stringDate = str(pickedDate)
-    # Print picked date
-    print(f"stringDate: {stringDate}")
 
     # Get current entry for habit from database fromk table "history" for the picked date
     user_id = session["user_id"]
@@ -447,14 +445,18 @@ def dashboard():
     with conn:
         cur = conn.cursor()
         cur.execute("SELECT value FROM history WHERE users_id = ? AND habit = ? AND date = ?", (user_id, habit, stringDate))
-        print(stringDate)
+        print(f"stringDate: {stringDate}")
         global currentEntry
         currentEntry = cur.fetchone()
-        print(currentEntry) # This is fine, but HTML is not rendering it, it only renderes initial value
+        print(f"currentRntry: {currentEntry}") 
         if currentEntry:
             currentEntry = currentEntry[0]
+            if currentEntry == 1:
+                currentEntry = "Done"
+            else:
+                currentEntry = "Missed"
         else:
-            currentEntry = ""
+            currentEntry = "Empty"
 
     # User reached route via POST (as by submitting a form via POST)
     if request.method == "POST": 
@@ -545,14 +547,16 @@ def archive():
                         
 
 # Generate data for SSE
-# It's only updating currentRtry foer picked date for now
 def generate_data():
+    """ Update current entry """
+
     while True:
         yield f"data: {currentEntry}\n\n"
-        time.sleep(0.0001)
+        time.sleep(0.01)
 
 @app.route('/data')
 def data():
+    """ SSE route """
     return Response(generate_data(), mimetype='text/event-stream')
 
 main()
