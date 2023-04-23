@@ -269,3 +269,15 @@ z-index: 1500;
     font-size: 1.3rem;
     font-weight: 500;
 }
+
+.done {
+  color: #198754;
+}
+
+.missed {
+  color: #dc3545;
+}
+
+.empty {
+  color: #6c757d;
+}

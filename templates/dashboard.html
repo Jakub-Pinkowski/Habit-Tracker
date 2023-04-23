@@ -104,7 +104,7 @@
             <h5 class="p-3">
                 Current entry:
             </h5>
-            <span id="data">
+            <span id="data" class="empty">
                 {{ currentEntry }}
             </span>
         </div>
@@ -257,19 +257,41 @@
 
 <!-- Change style of data element depending on the entry -->
 <script>
-    // Make "data" span element different color depending on the entry
-    const entry = dataElement.textContent;
-    console.log(entry);
-    if (entry == "Done") {
-        dataElement.style.color = "green";
-    } else if (entry == "Empty") {
-        dataElement.style.color = "grey";
-    } else if (entry == "Missed") {
-        dataElement.style.color = "red";
+    // get the "data" element
+    var entry = document.getElementById("data");
+    console.log(entry)
+
+    // set up a mutation observer to watch for changes to the "data" element
+    var observer = new MutationObserver(function(mutationsList, observer) {
+        // get the new value of the "data" element
+        var newValue = entry.textContent.trim();
+        
+        // update the class of the "data" element based on the new value
+        if (newValue === "Done") {
+            entry.classList.remove("missed");
+            entry.classList.remove("empty");
+            entry.classList.add("done");
+        } else if (newValue === "Missed") {
+            entry.classList.remove("done");
+            entry.classList.remove("empty");
+            entry.classList.add("missed");
+        } else if (newValue === "Empty") {
+            entry.classList.remove("done");
+            entry.classList.remove("missed");
+            entry.classList.add("empty");
+        }
+    });
+
+    observer.observe(dataElement, {characterData: true, subtree: true});
+
+    // update the initial class of the "data" element based on its initial value
+    var initialValue = dataElement.textContent.trim();
+    if (initialValue === "done") {
+        entry.classList.add("done");
+    } else if (initialValue === "missed") {
+        entry.classList.add("missed");
+    } else if (initialValue === "") {
+        entry.classList.add("empty");
     }
-
-
-
-
 </script>
 {% endblock %}

@@ -524,6 +524,8 @@ def dashboard():
                         currentEntry = "Done"
                     elif currentEntry == -1:
                         currentEntry = "Missed"
+                    elif currentEntry == 0:
+                        currentEntry = "Empty"
                 else:
                     currentEntry = "Empty"
 
