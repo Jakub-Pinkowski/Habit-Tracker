@@ -490,8 +490,28 @@ def dashboard():
                     cur.execute("INSERT INTO history (users_id, habit, date, value) VALUES(?, ?, ?, ?)", (user_id, habit, stringDate, change_entry))
                     conn.commit()
 
+            # TESTING
             print(f"change_entry: {change_entry}")
-            
+
+
+            # Get current entry for habit from database from table "history" for the picked date
+            user_id = session["user_id"]
+            conn = create_connection(database)
+            with conn:
+                cur = conn.cursor()
+                cur.execute("SELECT value FROM history WHERE users_id = ? AND habit = ? AND date = ?", (user_id, habit, stringDate))
+                print(f"stringDate: after change {stringDate}")
+                currentEntry = cur.fetchone()
+                print(f"currentEntry: after change: {currentEntry}") 
+                if currentEntry:
+                    currentEntry = currentEntry[0]
+                    if currentEntry == 1:
+                        currentEntry = "Done"
+                    elif currentEntry == -1:
+                        currentEntry = "Missed"
+                else:
+                    currentEntry = "Empty"
+
             # Flash
             flash("Entry updated!")
             alert_type = "alert-primary"
