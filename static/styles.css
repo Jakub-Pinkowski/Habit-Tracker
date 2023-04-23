@@ -253,8 +253,8 @@ z-index: 1500;
   
   /* Svgs */
 
-/* Style for screens smaller than 768px */
-@media (max-width: 767px) {
+/* Style for screens smaller than 800px */
+@media (max-width: 900px) {
   /* Make the main container a flex column */
   .main_container_dashboard {
     flex-direction: column;

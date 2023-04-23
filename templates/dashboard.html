@@ -282,10 +282,10 @@
         }
     });
 
-    observer.observe(dataElement, {characterData: true, subtree: true});
+    observer.observe(entry, {characterData: true, subtree: true});
 
     // update the initial class of the "data" element based on its initial value
-    var initialValue = dataElement.textContent.trim();
+    var initialValue = entry.textContent.trim();
     if (initialValue === "done") {
         entry.classList.add("done");
     } else if (initialValue === "missed") {
@@ -293,5 +293,9 @@
     } else if (initialValue === "") {
         entry.classList.add("empty");
     }
+</script>
+
+<script>
+    
 </script>
 {% endblock %}
