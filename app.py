@@ -191,9 +191,6 @@ def index():
     habits = []
 
     # Append only unarchived habits list from database only for the current user 
-
-
-
     conn = create_connection(database)
     with conn:
         cur = conn.cursor()
@@ -427,43 +424,116 @@ def habits():
 def dashboard():
     """ Dashboard page """
 
-    # TESTING FOR RANDOM HABIT
-    habit = "Habit 3"
-
-    # Get picked date from Javascript
-    pickedDate = request.data.decode('utf-8')
-    if pickedDate:
-        pickedDate = datetime.strptime(pickedDate, '%Y-%m-%d').date()
-    else:
-        pickedDate = datetime.now().date()  # Set default value to current date
-    # Convert picked date to string
-    stringDate = str(pickedDate)
-
-    # Get current entry for habit from database fromk table "history" for the picked date
-    user_id = session["user_id"]
-    conn = create_connection(database)
-    with conn:
-        cur = conn.cursor()
-        cur.execute("SELECT value FROM history WHERE users_id = ? AND habit = ? AND date = ?", (user_id, habit, stringDate))
-        print(f"stringDate: {stringDate}")
-        global currentEntry
-        currentEntry = cur.fetchone()
-        print(f"currentRntry: {currentEntry}") 
-        if currentEntry:
-            currentEntry = currentEntry[0]
-            if currentEntry == 1:
-                currentEntry = "Done"
-            else:
-                currentEntry = "Missed"
-        else:
-            currentEntry = "Empty"
+    # Create variables
+    habit = "Habit 11"
 
     # User reached route via POST (as by submitting a form via POST)
-    if request.method == "POST": 
-        return render_template("dashboard.html", habit=habit, stringDate=stringDate, currentEntry=currentEntry)
+    if request.method == "POST":
+
+        # Set default value to current date
+        pickedDate = datetime.now().date()
+
+        # Get picked date from Javascript
+        if request.data.decode('utf-8') != "":
+            pickedDate = request.data.decode('utf-8')
+            # Convert picked date to datetime object
+            pickedDate = datetime.strptime(pickedDate, '%Y-%m-%d').date()
+        else:
+            # Remember picked date from the last time the page was refreshed
+            pickedDate = session["pickedDate"]
+            print(f"session['pickedDate']: {session['pickedDate']}")
+
+        # Store the value of pickedDate in the session
+        session["pickedDate"] = pickedDate
+
+        # Convert picked date to string
+        stringDate = str(pickedDate)
+
+        # Get current entry for habit from database from table "history" for the picked date
+        user_id = session["user_id"]
+        conn = create_connection(database)
+        with conn:
+            cur = conn.cursor()
+            cur.execute("SELECT value FROM history WHERE users_id = ? AND habit = ? AND date = ?", (user_id, habit, stringDate))
+            print(f"stringDate: {stringDate}")
+            global currentEntry
+            currentEntry = cur.fetchone()
+            print(f"currentEntry: {currentEntry}") 
+            if currentEntry:
+                currentEntry = currentEntry[0]
+                if currentEntry == 1:
+                    currentEntry = "Done"
+                elif currentEntry == -1:
+                    currentEntry = "Missed"
+            else:
+                currentEntry = "Empty"
+
+        # Change entry form
+        change_entry = request.form.get("change_entry")
+
+        if change_entry:
+
+            # Update  entry in database
+            # Check if there is already any entry for the picked date for the current user for the habit
+            user_id = session["user_id"]
+            conn = create_connection(database)
+            with conn:
+                cur = conn.cursor()
+                cur.execute("SELECT value FROM history WHERE users_id = ? AND habit = ? AND date = ?", (user_id, habit, stringDate))
+                entry = cur.fetchone()
+                if entry:
+                    # Update entry
+                    cur.execute("UPDATE history SET value = ? WHERE users_id = ? AND habit = ? AND date = ?", (change_entry, user_id, habit, stringDate))
+                    conn.commit()
+                else:
+                    # Insert entry
+                    cur.execute("INSERT INTO history (users_id, habit, date, value) VALUES(?, ?, ?, ?)", (user_id, habit, stringDate, change_entry))
+                    conn.commit()
+
+            print(f"change_entry: {change_entry}")
+            
+            # Flash
+            flash("Entry updated!")
+            alert_type = "alert-primary"
+
+            # Redirect user to dashboard page
+            return render_template("dashboard.html", alert_type=alert_type, habit=habit, stringDate=stringDate, currentEntry=currentEntry)
+        
+        # Redirect user to dashboard page 
+        else:
+            return render_template("dashboard.html", habit=habit, stringDate=stringDate, currentEntry=currentEntry)
 
     # User reached route via GET (as by clicking a link or via redirect)
-    
+    else:
+
+        # Get picked date from Javascript
+        pickedDate = request.data.decode('utf-8')
+        if pickedDate:
+            pickedDate = datetime.strptime(pickedDate, '%Y-%m-%d').date()
+        else:
+            pickedDate = datetime.now().date()  # Set default value to current date
+
+        # Convert picked date to string
+        stringDate = str(pickedDate)
+
+        # Get current entry for habit from database from table "history" for the picked date
+        user_id = session["user_id"]
+        conn = create_connection(database)
+        with conn:
+            cur = conn.cursor()
+            cur.execute("SELECT value FROM history WHERE users_id = ? AND habit = ? AND date = ?", (user_id, habit, stringDate))
+            print(f"stringDate: {stringDate}")
+            currentEntry = cur.fetchone()
+            print(f"currentEntry: {currentEntry}") 
+            if currentEntry:
+                currentEntry = currentEntry[0]
+                if currentEntry == 1:
+                    currentEntry = "Done"
+                elif currentEntry == -1:
+                    currentEntry = "Missed"
+            else:
+                currentEntry = "Empty"
+
     return render_template("dashboard.html", habit=habit, stringDate=stringDate, currentEntry=currentEntry)
 
 
