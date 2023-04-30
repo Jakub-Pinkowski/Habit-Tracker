@@ -495,11 +495,30 @@ def habits():
 def dashboard():
     """ Dashboard page """
 
-    # Create variables
-    habit = "Habit 11"
+    # List all habits from database except for the archived habits
+    habits = []
+    user_id = session["user_id"]
+    conn = create_connection(database)
+    with conn:
+        cur = conn.cursor()
+        cur.execute("SELECT habit FROM habits WHERE users_id = ? AND archived = 0", (user_id,))
+        rows = cur.fetchall()
+        for row in rows:
+            habits.append(row[0])
+
+    # Get the habit from the form
+    habit = request.form.get("habit_dashboard")
+    print(f"habit: {habit}")
+
+    if habit == None:
+        habit = session["habit"]
 
     # User reached route via POST (as by submitting a form via POST)
     if request.method == "POST":
+
+        # Remember the habit from the last time the page was refreshed
+        session["habit"] = habit
+        print(f"session['habit']: {session['habit']}")
 
         # Set default value to current date
         pickedDate = datetime.now().date()
@@ -521,7 +540,7 @@ def dashboard():
         if pickedDate > datetime.now().date():
             flash("Date cannot be in the future!")
             alert_type = "alert-danger"
-            return render_template("dashboard.html", alert_type=alert_type, habit=habit)
+            return render_template("dashboard.html", alert_type=alert_type, habits=habits)
 
         # Convert picked date to string
         stringDate = str(pickedDate)
@@ -605,21 +624,17 @@ def dashboard():
             alert_type = "alert-primary"
 
             # Redirect user to dashboard page
-            return render_template("dashboard.html", alert_type=alert_type, habit=habit, stringDate=stringDate, currentEntry=currentEntry)
+            return render_template("dashboard.html", alert_type=alert_type, habit=habit, habits=habits, stringDate=stringDate, currentEntry=currentEntry)
         
         # Redirect user to dashboard page 
         else:
-            return render_template("dashboard.html", habit=habit, stringDate=stringDate, currentEntry=currentEntry)
+            return render_template("dashboard.html", habits=habits, habit=habit, stringDate=stringDate, currentEntry=currentEntry)
 
     # User reached route via GET (as by clicking a link or via redirect)
     else:
 
-        # Get picked date from Javascript
-        pickedDate = request.data.decode('utf-8')
-        if pickedDate:
-            pickedDate = datetime.strptime(pickedDate, '%Y-%m-%d').date()
-        else:
-            pickedDate = datetime.now().date()  # Set default value to current date
+        # Set default value to current date
+        pickedDate = datetime.now().date()
 
         # Convert picked date to string
         stringDate = str(pickedDate)
@@ -630,19 +645,21 @@ def dashboard():
         with conn:
             cur = conn.cursor()
             cur.execute("SELECT value FROM history WHERE users_id = ? AND habit = ? AND date = ?", (user_id, habit, stringDate))
-            print(f"stringDate: {stringDate}")
+            print(f"stringDate: after change {stringDate}")
             currentEntry = cur.fetchone()
-            print(f"currentEntry: {currentEntry}") 
+            print(f"currentEntry: after change: {currentEntry}") 
             if currentEntry:
                 currentEntry = currentEntry[0]
                 if currentEntry == 1:
                     currentEntry = "Done"
                 elif currentEntry == -1:
                     currentEntry = "Missed"
+                elif currentEntry == 0:
+                    currentEntry = "Empty"
             else:
                 currentEntry = "Empty"
 
-    return render_template("dashboard.html", habit=habit, stringDate=stringDate, currentEntry=currentEntry)
+        return render_template("dashboard.html", habits=habits, habit=habit, stringDate=stringDate, currentEntry=currentEntry)
 
 
 @app.route("/archive", methods=["GET", "POST"])

@@ -5,6 +5,27 @@
 {% endblock %}
 
 {% block main %}
+
+
+<div class="dropdown">
+    <button class="btn btn-lg btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+      Choose Habit
+    </button>
+    <ul class="dropdown-menu">
+        <form action="/dashboard" method="post">
+
+            {% for habit in habits %}
+
+            <li>
+                <input class="dropdown-item" type="submit" id="habit_dashboard" name="habit_dashboard" value="{{ habit }}">
+            </li>
+
+            {% endfor %}
+        
+        </form>
+    </ul>
+  </div>
+
 <div id="main_container_dashboard" class="d-flex align-items-center py-md-5 main_container_dashboard">
     <div id="name_of_the_habit" class="p-4">
         <h2>
@@ -121,7 +142,6 @@
         
     </div>
 </div>
-
 
 <!-- Calendar -->
 <script>
@@ -262,6 +282,7 @@
 
     // set up a mutation observer to watch for changes to the "data" element
     var observer = new MutationObserver(function(mutationsList, observer) {
+        
         // get the new value of the "data" element
         var newValue = entry.textContent.trim();
         
