@@ -286,3 +286,23 @@ z-index: 1500;
   border-radius: 0.5rem;
   border: 2px solid #b3b6bd;
 }
+
+#div_container_password_requirements {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+#div_password_requirements {
+  padding-left: 1.1rem;
+  margin-top: 2rem;
+  width: 225px;
+  text-align: left;
+}
+
+#ul_password_requirements {
+  list-style-type: circle;
+  padding-left: 0;
+  font-size: 0.9rem;
+  text-align: left;
+}

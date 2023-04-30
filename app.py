@@ -5,7 +5,7 @@ from flask_session import Session
 from werkzeug.security import check_password_hash, generate_password_hash
 from datetime import date, datetime
 import time
-from helpers import apology, login_required, Habit
+from helpers import login_required, Habit
 
 
 # Main function
@@ -94,6 +94,42 @@ def register():
         # Ensure password was submitted
         elif not password:
             flash("Please provide password!")
+            alert_type = "alert-danger"
+            return render_template("register.html", alert_type=alert_type)
+
+        # Check if password is at least 8 characters long
+        elif len(password) < 8:
+            flash("Password must be at least 8 characters long!")
+            alert_type = "alert-danger"
+            return render_template("register.html", alert_type=alert_type)
+        
+        # Check if password contains at least one number
+        elif not any(char.isdigit() for char in password):
+            flash("Password must contain at least one number!")
+            alert_type = "alert-danger"
+            return render_template("register.html", alert_type=alert_type)
+        
+        # Check if password contains at least one uppercase letter
+        elif not any(char.isupper() for char in password):
+            flash("Password must contain at least one uppercase letter!")
+            alert_type = "alert-danger"
+            return render_template("register.html", alert_type=alert_type)
+        
+        # Check if password contains at least one lowercase letter
+        elif not any(char.islower() for char in password):
+            flash("Password must contain at least one lowercase letter!")
+            alert_type = "alert-danger"
+            return render_template("register.html", alert_type=alert_type)
+        
+        # Check if password contains at least one special character
+        elif not any(char in "!@#$%^&*()-+?_=,<>/;:[]{}" for char in password):
+            flash("Password must contain at least one special character!")
+            alert_type = "alert-danger"
+            return render_template("register.html", alert_type=alert_type)
+        
+        # Ensure confirmation was submitted
+        elif not confirmation:
+            flash("Please provide confirmation!")
             alert_type = "alert-danger"
             return render_template("register.html", alert_type=alert_type)
         
