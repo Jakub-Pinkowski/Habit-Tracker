@@ -1,10 +1,11 @@
 import sqlite3
 from sqlite3 import Error
 from flask import Flask, flash, redirect, render_template, request, session, url_for, jsonify, Response
+from flask_session import Session
 from werkzeug.security import check_password_hash, generate_password_hash
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 import time
-from helpers import apology, login_required, Habit
+from helpers import login_required, Habit
 
 
 # Main function
@@ -14,27 +15,22 @@ def main():
     print("Main funcion working now")
 
 
+
 # Configure application
 app = Flask(__name__)
-
-# Secret key for sessions
-app.secret_key = '3d6f45da5fdsfghc1244ert5dbac2wercxfdf59c3b6c7cb1'
 
 # Configure session to use filesystem (instead of signed cookies)
 app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
-
-# Global variables
-formattedDate = None
-
-
+Session(app)
 
 # Databeses functions
 
-database = (r"test.db")
+database = (r"database.db")
 
 def create_connection(db_file):
     """ Create a database connection to a SQLite database"""
+
     conn = None
     try:
         conn = sqlite3.connect(db_file)
@@ -44,12 +40,35 @@ def create_connection(db_file):
 
 def create_user(conn, user):
     """ Create a new user into the users table"""
+
     sql = ("INSERT INTO users (username, hash) VALUES(?, ?)")
     cur = conn.cursor()
     cur.execute(sql, user)
     conn.commit()
     return cur.lastrowid
 
+# Create tables
+
+def create_users_table(conn):
+    """ Create users table """
+
+    sql = ("CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT NOT NULL, hash TEXT NOT NULL)")
+    cur = conn.cursor()
+    cur.execute(sql)
+
+def create_habits_table(conn):
+    """ Create habits table """
+
+    sql = ("CREATE TABLE IF NOT EXISTS habits (users_id INTEGER NOT NULL, habit TEXT NOT NULL, archived INTEGER NOT NULL DEFAULT 0, FOREIGN KEY(users_id) REFERENCES users(id))")
+    cur = conn.cursor()
+    cur.execute(sql)
+
+def create_history_table (conn):
+    """ Create history table """
+
+    sql = ("CREATE TABLE IF NOT EXISTS history (users_id INTEGER NOT NULL, habit TEXT NOT NULL, date TEXT NOT NULL, value REAL, FOREIGN KEY(users_id) REFERENCES users(id), FOREIGN KEY(habit) REFERENCES habits(habit))")
+    cur = conn.cursor()
+    cur.execute(sql)
 
 # Define routes
 
@@ -77,6 +96,42 @@ def register():
             flash("Please provide password!")
             alert_type = "alert-danger"
             return render_template("register.html", alert_type=alert_type)
+
+        # Check if password is at least 8 characters long
+        elif len(password) < 8:
+            flash("Password must be at least 8 characters long!")
+            alert_type = "alert-danger"
+            return render_template("register.html", alert_type=alert_type)
+        
+        # Check if password contains at least one number
+        elif not any(char.isdigit() for char in password):
+            flash("Password must contain at least one number!")
+            alert_type = "alert-danger"
+            return render_template("register.html", alert_type=alert_type)
+        
+        # Check if password contains at least one uppercase letter
+        elif not any(char.isupper() for char in password):
+            flash("Password must contain at least one uppercase letter!")
+            alert_type = "alert-danger"
+            return render_template("register.html", alert_type=alert_type)
+        
+        # Check if password contains at least one lowercase letter
+        elif not any(char.islower() for char in password):
+            flash("Password must contain at least one lowercase letter!")
+            alert_type = "alert-danger"
+            return render_template("register.html", alert_type=alert_type)
+        
+        # Check if password contains at least one special character
+        elif not any(char in "!@#$%^&*()-+?_=,<>/;:[]{}" for char in password):
+            flash("Password must contain at least one special character!")
+            alert_type = "alert-danger"
+            return render_template("register.html", alert_type=alert_type)
+        
+        # Ensure confirmation was submitted
+        elif not confirmation:
+            flash("Please provide confirmation!")
+            alert_type = "alert-danger"
+            return render_template("register.html", alert_type=alert_type)
         
         # Ensure the confirmation matches the original password
         elif password != confirmation:
@@ -84,6 +139,11 @@ def register():
             alert_type = "alert-danger"
             return render_template("register.html", alert_type=alert_type)
         
+        # Create users table if it doesn't exist
+        conn = create_connection(database)
+        with conn:
+            create_users_table(conn)
+
         # Check if username already exists
         conn = create_connection(database)
         with conn:
@@ -186,9 +246,20 @@ def index():
     # Create variables
     user_id = session["user_id"]
     today = date.today()
+    habit_name = request.form.get("habit_name")
 
-    # create a list of Habit objects
+    # Create a list of Habit objects
     habits = []
+
+    # Create habits table if it doesn't exist
+    conn = create_connection(database)
+    with conn:
+        create_habits_table(conn)
+
+    # Create history table if it doesn't exist
+    conn = create_connection(database)
+    with conn:
+        create_history_table(conn)
 
     # Append only unarchived habits list from database only for the current user 
     conn = create_connection(database)
@@ -250,12 +321,18 @@ def index():
                 cur = conn.cursor()
                 cur.execute("SELECT * FROM history WHERE users_id = ? AND habit = ? ORDER BY date DESC", (user_id, habit_name))
                 rows = cur.fetchall()
+                prev_date = None
                 for row in rows:
-                    if row[2] == 1:
-                        streak += 1
+                    if row[3] == 1:
+                        curr_date = datetime.strptime(row[2], '%Y-%m-%d') # Convert string to datetime
+                        if prev_date is None or (prev_date - curr_date) == timedelta(days=1):
+                            streak += 1
+                            prev_date = curr_date
+                        else:
+                            break
                     else:
                         break
-            habit.streak = streak
+                habit.streak = streak
 
         return render_template("index.html", habits=habits, alert_type=alert_type)
             
@@ -264,21 +341,27 @@ def index():
 
         # Count streak for each habit and update this value in the Habit object
         for habit in habits:
+            user_id = session["user_id"]
             streak = 0
             habit_name = habit.name
             habit_id = habit.id
-            user_id = session["user_id"]
             conn = create_connection(database)
             with conn:
                 cur = conn.cursor()
                 cur.execute("SELECT * FROM history WHERE users_id = ? AND habit = ? ORDER BY date DESC", (user_id, habit_name))
                 rows = cur.fetchall()
+                prev_date = None
                 for row in rows:
-                    if row[2] == 1:
-                        streak += 1
+                    if row[3] == 1:
+                        curr_date = datetime.strptime(row[2], '%Y-%m-%d') # Convert string to datetime
+                        if prev_date is None or (prev_date - curr_date) == timedelta(days=1):
+                            streak += 1
+                            prev_date = curr_date
+                        else:
+                            break
                     else:
                         break
-            habit.streak = streak
+                habit.streak = streak
 
         return render_template("index.html", habits=habits)
 
@@ -424,11 +507,30 @@ def habits():
 def dashboard():
     """ Dashboard page """
 
-    # Create variables
-    habit = "Habit 11"
+    # List all habits from database except for the archived habits
+    habits = []
+    user_id = session["user_id"]
+    conn = create_connection(database)
+    with conn:
+        cur = conn.cursor()
+        cur.execute("SELECT habit FROM habits WHERE users_id = ? AND archived = 0", (user_id,))
+        rows = cur.fetchall()
+        for row in rows:
+            habits.append(row[0])
+
+    # Get the habit from the form
+    habit = request.form.get("habit_dashboard")
+    print(f"habit: {habit}")
+
+    if habit == None:
+        habit = session["habit"]
 
     # User reached route via POST (as by submitting a form via POST)
     if request.method == "POST":
+
+        # Remember the habit from the last time the page was refreshed
+        session["habit"] = habit
+        print(f"session['habit']: {session['habit']}")
 
         # Set default value to current date
         pickedDate = datetime.now().date()
@@ -450,7 +552,7 @@ def dashboard():
         if pickedDate > datetime.now().date():
             flash("Date cannot be in the future!")
             alert_type = "alert-danger"
-            return render_template("dashboard.html", alert_type=alert_type, habit=habit)
+            return render_template("dashboard.html", alert_type=alert_type, habits=habits)
 
         # Convert picked date to string
         stringDate = str(pickedDate)
@@ -534,21 +636,17 @@ def dashboard():
             alert_type = "alert-primary"
 
             # Redirect user to dashboard page
-            return render_template("dashboard.html", alert_type=alert_type, habit=habit, stringDate=stringDate, currentEntry=currentEntry)
+            return render_template("dashboard.html", alert_type=alert_type, habit=habit, habits=habits, stringDate=stringDate, currentEntry=currentEntry)
         
         # Redirect user to dashboard page 
         else:
-            return render_template("dashboard.html", habit=habit, stringDate=stringDate, currentEntry=currentEntry)
+            return render_template("dashboard.html", habits=habits, habit=habit, stringDate=stringDate, currentEntry=currentEntry)
 
     # User reached route via GET (as by clicking a link or via redirect)
     else:
 
-        # Get picked date from Javascript
-        pickedDate = request.data.decode('utf-8')
-        if pickedDate:
-            pickedDate = datetime.strptime(pickedDate, '%Y-%m-%d').date()
-        else:
-            pickedDate = datetime.now().date()  # Set default value to current date
+        # Set default value to current date
+        pickedDate = datetime.now().date()
 
         # Convert picked date to string
         stringDate = str(pickedDate)
@@ -559,19 +657,21 @@ def dashboard():
         with conn:
             cur = conn.cursor()
             cur.execute("SELECT value FROM history WHERE users_id = ? AND habit = ? AND date = ?", (user_id, habit, stringDate))
-            print(f"stringDate: {stringDate}")
+            print(f"stringDate: after change {stringDate}")
             currentEntry = cur.fetchone()
-            print(f"currentEntry: {currentEntry}") 
+            print(f"currentEntry: after change: {currentEntry}") 
             if currentEntry:
                 currentEntry = currentEntry[0]
                 if currentEntry == 1:
                     currentEntry = "Done"
                 elif currentEntry == -1:
                     currentEntry = "Missed"
+                elif currentEntry == 0:
+                    currentEntry = "Empty"
             else:
                 currentEntry = "Empty"
 
-    return render_template("dashboard.html", habit=habit, stringDate=stringDate, currentEntry=currentEntry)
+        return render_template("dashboard.html", habits=habits, habit=habit, stringDate=stringDate, currentEntry=currentEntry)
 
 
 @app.route("/archive", methods=["GET", "POST"])
