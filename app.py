@@ -525,6 +525,32 @@ def dashboard():
     if habit == None:
         habit = session["habit"]
 
+    # Create a list with all the dates on which the habit were completed. 
+    # Habit was completed if the value in the database in the table "history" is 1 for a given date
+    # The list will be used to color the calendar
+    completed_dates = []
+    conn = create_connection(database)
+    with conn:
+        cur = conn.cursor()
+        cur.execute("SELECT date FROM history WHERE users_id = ? AND habit = ? AND value = 1", (user_id, habit))
+        rows = cur.fetchall()
+        for row in rows:
+            completed_dates.append(row[0])
+    print(f"completed_dates: {completed_dates}")
+
+    # Create a list with all the dates on which the habits were missed. 
+    # Habit was completed if the value in the database in the table "history" is -1 for a given date
+    # The list will be used to color the calendar
+    missed_dates = []
+    conn = create_connection(database)
+    with conn:
+        cur = conn.cursor()
+        cur.execute("SELECT date FROM history WHERE users_id = ? AND habit = ? AND value = -1", (user_id, habit))
+        rows = cur.fetchall()
+        for row in rows:
+            missed_dates.append(row[0])
+    print(f"missed_dates: {missed_dates}")
+
     # User reached route via POST (as by submitting a form via POST)
     if request.method == "POST":
 
