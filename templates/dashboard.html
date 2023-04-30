@@ -259,7 +259,6 @@
 <script>
     // get the "data" element
     var entry = document.getElementById("data");
-    console.log(entry)
 
     // set up a mutation observer to watch for changes to the "data" element
     var observer = new MutationObserver(function(mutationsList, observer) {
@@ -306,7 +305,5 @@
             button.classList.add('selected');
         });
     });
-
-    // Add a click event listener to each of the day buttons
 </script>
 {% endblock %}
