@@ -3,7 +3,7 @@ from sqlite3 import Error
 from flask import Flask, flash, redirect, render_template, request, session, url_for, jsonify, Response
 from flask_session import Session
 from werkzeug.security import check_password_hash, generate_password_hash
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 import time
 from helpers import login_required, Habit
 
@@ -321,12 +321,18 @@ def index():
                 cur = conn.cursor()
                 cur.execute("SELECT * FROM history WHERE users_id = ? AND habit = ? ORDER BY date DESC", (user_id, habit_name))
                 rows = cur.fetchall()
+                prev_date = None
                 for row in rows:
                     if row[3] == 1:
-                        streak += 1
+                        curr_date = datetime.strptime(row[2], '%Y-%m-%d') # Convert string to datetime
+                        if prev_date is None or (prev_date - curr_date) == timedelta(days=1):
+                            streak += 1
+                            prev_date = curr_date
+                        else:
+                            break
                     else:
                         break
-            habit.streak = streak
+                habit.streak = streak
 
         return render_template("index.html", habits=habits, alert_type=alert_type)
             
@@ -335,21 +341,27 @@ def index():
 
         # Count streak for each habit and update this value in the Habit object
         for habit in habits:
+            user_id = session["user_id"]
             streak = 0
             habit_name = habit.name
             habit_id = habit.id
-            user_id = session["user_id"]
             conn = create_connection(database)
             with conn:
                 cur = conn.cursor()
                 cur.execute("SELECT * FROM history WHERE users_id = ? AND habit = ? ORDER BY date DESC", (user_id, habit_name))
                 rows = cur.fetchall()
+                prev_date = None
                 for row in rows:
                     if row[3] == 1:
-                        streak += 1
+                        curr_date = datetime.strptime(row[2], '%Y-%m-%d') # Convert string to datetime
+                        if prev_date is None or (prev_date - curr_date) == timedelta(days=1):
+                            streak += 1
+                            prev_date = curr_date
+                        else:
+                            break
                     else:
                         break
-            habit.streak = streak
+                habit.streak = streak
 
         return render_template("index.html", habits=habits)
 

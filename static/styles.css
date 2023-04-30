@@ -315,3 +315,7 @@ z-index: 1500;
 .done_or_missed_button {
   width: 100px;
 }
+
+#name_of_the_habit {
+  width: 300px;
+}
