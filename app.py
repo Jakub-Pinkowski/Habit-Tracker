@@ -24,17 +24,13 @@ app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
 
-# Global variables
-formattedDate = None
-
-
-
 # Databeses functions
 
-database = (r"test.db")
+database = (r"database.db")
 
 def create_connection(db_file):
     """ Create a database connection to a SQLite database"""
+
     conn = None
     try:
         conn = sqlite3.connect(db_file)
@@ -44,12 +40,35 @@ def create_connection(db_file):
 
 def create_user(conn, user):
     """ Create a new user into the users table"""
+
     sql = ("INSERT INTO users (username, hash) VALUES(?, ?)")
     cur = conn.cursor()
     cur.execute(sql, user)
     conn.commit()
     return cur.lastrowid
 
+# Create tables
+
+def create_users_table(conn):
+    """ Create users table """
+
+    sql = ("CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT NOT NULL, hash TEXT NOT NULL)")
+    cur = conn.cursor()
+    cur.execute(sql)
+
+def create_habits_table(conn):
+    """ Create habits table """
+
+    sql = ("CREATE TABLE IF NOT EXISTS habits (users_id INTEGER NOT NULL, habit TEXT NOT NULL, archived INTEGER NOT NULL DEFAULT 0, FOREIGN KEY(users_id) REFERENCES users(id))")
+    cur = conn.cursor()
+    cur.execute(sql)
+
+def create_history_table (conn):
+    """ Create history table """
+
+    sql = ("CREATE TABLE IF NOT EXISTS history (users_id INTEGER NOT NULL, habit TEXT NOT NULL, date TEXT NOT NULL, value REAL, FOREIGN KEY(users_id) REFERENCES users(id), FOREIGN KEY(habit) REFERENCES habits(habit))")
+    cur = conn.cursor()
+    cur.execute(sql)
 
 # Define routes
 
@@ -84,6 +103,11 @@ def register():
             alert_type = "alert-danger"
             return render_template("register.html", alert_type=alert_type)
         
+        # Create users table if it doesn't exist
+        conn = create_connection(database)
+        with conn:
+            create_users_table(conn)
+
         # Check if username already exists
         conn = create_connection(database)
         with conn:
@@ -186,9 +210,20 @@ def index():
     # Create variables
     user_id = session["user_id"]
     today = date.today()
+    habit_name = request.form.get("habit_name")
 
-    # create a list of Habit objects
+    # Create a list of Habit objects
     habits = []
+
+    # Create habits table if it doesn't exist
+    conn = create_connection(database)
+    with conn:
+        create_habits_table(conn)
+
+    # Create history table if it doesn't exist
+    conn = create_connection(database)
+    with conn:
+        create_history_table(conn)
 
     # Append only unarchived habits list from database only for the current user 
     conn = create_connection(database)
@@ -251,7 +286,7 @@ def index():
                 cur.execute("SELECT * FROM history WHERE users_id = ? AND habit = ? ORDER BY date DESC", (user_id, habit_name))
                 rows = cur.fetchall()
                 for row in rows:
-                    if row[2] == 1:
+                    if row[3] == 1:
                         streak += 1
                     else:
                         break
@@ -274,7 +309,7 @@ def index():
                 cur.execute("SELECT * FROM history WHERE users_id = ? AND habit = ? ORDER BY date DESC", (user_id, habit_name))
                 rows = cur.fetchall()
                 for row in rows:
-                    if row[2] == 1:
+                    if row[3] == 1:
                         streak += 1
                     else:
                         break
