@@ -71,6 +71,7 @@
                     <div class="cal-days">
                     {% for day in range(1, 32) %}
                           <button class="btn cal-btn" type="button">{{ day }}</button>
+                        
                     {% endfor %}
                     </div>
                 </div>
@@ -108,7 +109,13 @@
     </div>
 </div>
 
-Overview, stats
+<ul>
+{% for date in completed_dates%}
+    <li>
+        {{ date }}
+    </li>
+{% endfor %}
+</ul>
 
 <!-- Calendar -->
 <script>
@@ -297,6 +304,42 @@ Overview, stats
 
 <!-- Make dynamic border for each button depending on the entry for the date -->
 <script>
+    // get the list of completed and missed dates from the Flask backend
+    // if the list is empty, set the variable to an empty list
+    const completedDates = {{ completed_dates|tojson if completed_dates else [] }};
+    console.log(completedDates);
+    const missedDates = {{ missed_dates|tojson if missed_dates else [] }};
+    console.log(missedDates);
+
+    // get all the calendar buttons
+    const calendarButtons = document.querySelectorAll('.cal-days button');
+
+    // loop through the calendar buttons
+    calendarButtons.forEach(button => {
+
+        // get the date of the button
+        const day = button.textContent;
+        const monthIndex = currentMonth;
+        const year = currentYear;
+        const selectedDate = new Date(year, monthIndex, day);
+        
+        // format the date
+        const newDate = new Date(selectedDate);
+        const newYear = newDate.getFullYear();
+        const newMonth = String(newDate.getMonth() + 1).padStart(2, '0');
+        const newDay = String(newDate.getDate()).padStart(2, '0');
+        const formattedDate = `${newYear}-${newMonth}-${newDay}`;
+
+        // if the date is in the list of completed dates, add the "done" class to the button
+        if (completedDates.includes(formattedDate)) {
+            button.classList.add('button_done');
+        }
+
+        // if the date is in the list of missed dates, add the "missed" class to the button
+        if (missedDates.includes(formattedDate)) {
+            button.classList.add('button_missed');
+        }
+    });
 
 
 </script>

@@ -282,9 +282,19 @@ z-index: 1500;
   color: #6c757d;
 }
 
+.button_done {
+  border: 3px solid #198754;
+  border-radius: 50%;
+}
+
+.button_missed {
+  border: 3px solid #dc3545;
+  border-radius: 50%;
+}
+
 .selected {
-  border-radius: 0.5rem;
-  border: 2px solid #b3b6bd;
+  border: 3px solid #b3b6bd;
+  border-radius: 50%;
 }
 
 #div_container_password_requirements {

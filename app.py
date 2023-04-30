@@ -1,5 +1,6 @@
 import sqlite3
 from sqlite3 import Error
+import json
 from flask import Flask, flash, redirect, render_template, request, session, url_for, jsonify, Response
 from flask_session import Session
 from werkzeug.security import check_password_hash, generate_password_hash
@@ -517,6 +518,7 @@ def dashboard():
         rows = cur.fetchall()
         for row in rows:
             habits.append(row[0])
+    print(f"habits: {habits}")
 
     # Get the habit from the form
     habit = request.form.get("habit_dashboard")
@@ -661,12 +663,32 @@ def dashboard():
             flash("Entry updated!")
             alert_type = "alert-primary"
 
+            # Update completed_dates and missed_dates lists
+            completed_dates = []
+            conn = create_connection(database)
+            with conn:
+                cur = conn.cursor()
+                cur.execute("SELECT date FROM history WHERE users_id = ? AND habit = ? AND value = 1", (user_id, habit))
+                rows = cur.fetchall()
+                for row in rows:
+                    completed_dates.append(row[0])
+
+            missed_dates = []
+            conn = create_connection(database)
+            with conn:
+                cur = conn.cursor()
+                cur.execute("SELECT date FROM history WHERE users_id = ? AND habit = ? AND value = -1", (user_id, habit))
+                rows = cur.fetchall()
+                for row in rows:
+                    missed_dates.append(row[0])
+
+
             # Redirect user to dashboard page
-            return render_template("dashboard.html", alert_type=alert_type, habit=habit, habits=habits, stringDate=stringDate, currentEntry=currentEntry)
+            return render_template("dashboard.html", alert_type=alert_type, habit=habit, habits=habits, stringDate=stringDate, currentEntry=currentEntry, completed_dates=completed_dates, missed_dates=missed_dates)
         
         # Redirect user to dashboard page 
         else:
-            return render_template("dashboard.html", habits=habits, habit=habit, stringDate=stringDate, currentEntry=currentEntry)
+            return render_template("dashboard.html", habits=habits, habit=habit, stringDate=stringDate, currentEntry=currentEntry, completed_dates=completed_dates, missed_dates=missed_dates)
 
     # User reached route via GET (as by clicking a link or via redirect)
     else:
@@ -697,7 +719,7 @@ def dashboard():
             else:
                 currentEntry = "Empty"
 
-        return render_template("dashboard.html", habits=habits, habit=habit, stringDate=stringDate, currentEntry=currentEntry)
+        return render_template("dashboard.html", habits=habits, habit=habit, stringDate=stringDate, currentEntry=currentEntry, completed_dates=completed_dates, missed_dates=missed_dates)
 
 
 @app.route("/archive", methods=["GET", "POST"])
