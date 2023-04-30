@@ -306,3 +306,12 @@ z-index: 1500;
   font-size: 0.9rem;
   text-align: left;
 }
+
+#done_or_missed {
+  display: flex;
+  justify-content: space-around;
+}
+
+.done_or_missed_button {
+  width: 100px;
+}

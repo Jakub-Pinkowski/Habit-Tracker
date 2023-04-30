@@ -20,11 +20,11 @@
           <ul class="list-unstyled mt-3 mb-4">
             <li>Did you do it today?</li>
           </ul>
-          <form action="/" method="post">
+          <form action="/" method="post" id="done_or_missed">
             <input type="hidden" id="habit{{ habit.id }}" name="habit{{ habit.id }}" value="{{ habit.name }}">
-            <button type="input" class="w-100 btn btn-lg btn-outline-success"
+            <button type="input" class="btn btn-lg btn-success done_or_missed_button"
              id="value{{ habit.id }}" name="value{{ habit.id }}" type="button" value="1">Done</button>
-            <button type="input" class="w-100 btn btn-lg btn-outline-danger"
+            <button type="input" class="btn btn-lg btn-danger done_or_missed_button"
              id="value{{ habit.id }}" name="value{{ habit.id }}" type="button" value="-1">Missed</button>
           </form>
         </div>
