@@ -549,21 +549,23 @@ def dashboard():
         for row in rows:
             missed_dates.append(row[0])
 
+    # Set default date to today
+    pickedDate = datetime.now().date()
+
     # User reached route via POST (as by submitting a form via POST)
     if request.method == "POST":
 
         # Remember the habit from the last time the page was refreshed
         session["habit"] = habit
 
-        # Set default value to current date
-        global pickedDate
-        pickedDate = session["pickedDate"]
-
         # Get picked date from Javascript
         if request.data.decode('utf-8') != "":
             pickedDate = request.data.decode('utf-8')
             # Convert picked date to datetime object 
             pickedDate = datetime.strptime(pickedDate, '%Y-%m-%d').date()
+
+            # Save picked date in the session
+            session["pickedDate"] = pickedDate
         else:
             # Remember picked date from the last time the page was refreshed
             pickedDate = session["pickedDate"]
@@ -668,7 +670,7 @@ def dashboard():
 
 
             # Redirect user to dashboard page
-            return render_template("dashboard.html", habit=habit, habits=habits, stringDate=stringDate, currentEntry=currentEntry, completed_dates=completed_dates, missed_dates=missed_dates)
+            return render_template("dashboard.html", habits=habits, habit=habit, stringDate=stringDate, currentEntry=currentEntry, completed_dates=completed_dates, missed_dates=missed_dates)
         
         # Redirect user to dashboard page 
         else:
@@ -677,11 +679,12 @@ def dashboard():
     # User reached route via GET (as by clicking a link or via redirect)
     else:
 
-        # Set default value to current date
-        pickedDate = datetime.now().date()
-
-        # Use date from session instead of default value
-        pickedDate = session["pickedDate"]
+        # Retrieve session date if it exists
+        if session.get("pickedDate"):
+            # Remember picked date from the last time the page was refreshed
+            pickedDate = session["pickedDate"]
+        print(f"session['pickedDate']: {session['pickedDate']}")
+        print(f"pickedDate: {pickedDate}")
 
         # Convert picked date to string
         stringDate = str(pickedDate)
