@@ -518,17 +518,15 @@ def dashboard():
         rows = cur.fetchall()
         for row in rows:
             habits.append(row[0])
-    print(f"habits: {habits}")
 
     # Get the habit from the form
     habit = request.form.get("habit_dashboard")
-    print(f"habit: {habit}")
 
+    # Remember the habit in the session
     if habit == None:
         habit = session["habit"]
 
     # Create a list with all the dates on which the habit were completed. 
-    # Habit was completed if the value in the database in the table "history" is 1 for a given date
     # The list will be used to color the calendar
     completed_dates = []
     conn = create_connection(database)
@@ -538,10 +536,8 @@ def dashboard():
         rows = cur.fetchall()
         for row in rows:
             completed_dates.append(row[0])
-    print(f"completed_dates: {completed_dates}")
 
     # Create a list with all the dates on which the habits were missed. 
-    # Habit was completed if the value in the database in the table "history" is -1 for a given date
     # The list will be used to color the calendar
     missed_dates = []
     conn = create_connection(database)
@@ -551,7 +547,6 @@ def dashboard():
         rows = cur.fetchall()
         for row in rows:
             missed_dates.append(row[0])
-    print(f"missed_dates: {missed_dates}")
 
     # User reached route via POST (as by submitting a form via POST)
     if request.method == "POST":
@@ -572,18 +567,18 @@ def dashboard():
             # Remember picked date from the last time the page was refreshed
             pickedDate = session["pickedDate"]
             print(f"session['pickedDate']: {session['pickedDate']}")
-
         # Store the value of pickedDate in the session
         session["pickedDate"] = pickedDate
+
+        # Convert picked date to string
+        stringDate = str(pickedDate)
 
         # Make sure that the picked date is not in the future
         if pickedDate > datetime.now().date():
             flash("Date cannot be in the future!")
             alert_type = "alert-danger"
-            return render_template("dashboard.html", alert_type=alert_type, habits=habits)
+            return render_template("dashboard.html", alert_type=alert_type, habit=habit, habits=habits, stringDate=stringDate, completed_dates=completed_dates, missed_dates=missed_dates)
 
-        # Convert picked date to string
-        stringDate = str(pickedDate)
 
         # Get current entry for habit from database from table "history" for the picked date
         user_id = session["user_id"]
@@ -594,7 +589,6 @@ def dashboard():
             print(f"stringDate: {stringDate}")
             global currentEntry
             currentEntry = cur.fetchone()
-            print(f"currentEntry: {currentEntry}") 
             if currentEntry:
                 currentEntry = currentEntry[0]
                 if currentEntry == 1:
@@ -635,10 +629,6 @@ def dashboard():
                     cur.execute("INSERT INTO history (users_id, habit, date, value) VALUES(?, ?, ?, ?)", (user_id, habit, stringDate, change_entry))
                     conn.commit()
 
-            # TESTING
-            print(f"change_entry: {change_entry}")
-
-
             # Get current entry for habit from database from table "history" for the picked date
             user_id = session["user_id"]
             conn = create_connection(database)
@@ -658,10 +648,6 @@ def dashboard():
                         currentEntry = "Empty"
                 else:
                     currentEntry = "Empty"
-
-            # Flash
-            flash("Entry updated!")
-            alert_type = "alert-primary"
 
             # Update completed_dates and missed_dates lists
             completed_dates = []
@@ -684,7 +670,7 @@ def dashboard():
 
 
             # Redirect user to dashboard page
-            return render_template("dashboard.html", alert_type=alert_type, habit=habit, habits=habits, stringDate=stringDate, currentEntry=currentEntry, completed_dates=completed_dates, missed_dates=missed_dates)
+            return render_template("dashboard.html", habit=habit, habits=habits, stringDate=stringDate, currentEntry=currentEntry, completed_dates=completed_dates, missed_dates=missed_dates)
         
         # Redirect user to dashboard page 
         else:
@@ -718,6 +704,7 @@ def dashboard():
                     currentEntry = "Empty"
             else:
                 currentEntry = "Empty"
+            print(f"currentEntry: {currentEntry}")
 
         return render_template("dashboard.html", habits=habits, habit=habit, stringDate=stringDate, currentEntry=currentEntry, completed_dates=completed_dates, missed_dates=missed_dates)
 

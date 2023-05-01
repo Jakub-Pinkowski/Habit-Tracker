@@ -47,7 +47,7 @@
                             <option value="March">March</option>
                             <option value="April">April</option>
                             <option value="May">May</option>
-                            <option selected value="June">June</option>
+                            <option value="June">June</option>
                             <option value="July">July</option>
                             <option value="August">August</option>
                             <option value="September">September</option>
@@ -109,17 +109,28 @@
     </div>
 </div>
 
-<ul>
-{% for date in completed_dates%}
-    <li>
-        {{ date }}
-    </li>
-{% endfor %}
+
+<ul> Completed dates:
+    {% for date in completed_dates%}
+        <li>
+            {{ date }}
+        </li>
+    {% endfor %}
 </ul>
+
+<ul> Missed dates:
+    {% for date in missed_dates%}
+        <li>
+            {{ date }}
+        </li>
+    {% endfor %}
+</ul>
+
 
 <!-- Calendar -->
 <script>
-    // Calendar
+
+    // Calendar variables
     const monthNames = [
         "January", "February", "March",
         "April", "May", "June", "July",
@@ -134,11 +145,27 @@
     const weekdaysDiv = document.querySelector('.cal-weekdays');
     const daysDiv = document.querySelector('.cal-days');
 
+    // Calendar data
+    const completedDates = {{ completed_dates|tojson if completed_dates else [] }};
+    console.log("completed dates are: " + completedDates);
+    const missedDates = {{ missed_dates|tojson if missed_dates else [] }};
+    console.log("missed dates are: " + missedDates);
+
     // Calendar functions
+
+    // Get current date
     let currentDate = new Date();
-    let currentMonth = currentDate.getMonth();
-    let currentYear = currentDate.getFullYear();
-    
+    console.log("current Date is: " + currentDate);
+
+    // Get updated date
+    let updatedDateStr = localStorage.getItem('selectedDate');
+    let updatedDate = new Date(Date.parse(updatedDateStr));
+    console.log("updated Date is: " + updatedDate);
+
+    // Get current month and year
+    let currentMonth = updatedDate.getMonth();
+    let currentYear = updatedDate.getFullYear();
+
 
     function daysInMonth(month, year) {
     return new Date(year, month + 1, 0).getDate();
@@ -150,6 +177,8 @@
     
     // Calendar update
     function updateCalendar() {
+
+        // Update month name
         monthNameSpan.textContent = monthNames[currentMonth] + " " + currentYear;
         weekdaysDiv.innerHTML = '';
         daysDiv.innerHTML = '';
@@ -160,6 +189,7 @@
             weekdaysDiv.appendChild(weekdayDiv);
         }
 
+        // Add empty day buttons to the beginning of the calendar
         const firstDayOfMonth = getFirstDayOfMonth(currentMonth, currentYear);
         for (let i = 0; i < firstDayOfMonth; i++) {
             const emptyDayBtn = document.createElement('button');
@@ -167,6 +197,7 @@
             daysDiv.appendChild(emptyDayBtn);
         }
 
+        // Add day buttons to the calendar
         const daysInCurrentMonth = daysInMonth(currentMonth, currentYear);
         for (let i = 1; i <= daysInCurrentMonth; i++) {
             const dayBtn = document.createElement('button');
@@ -175,49 +206,80 @@
             daysDiv.appendChild(dayBtn);
         }
     
-        // Add a click event listener to each of the day buttons
+        // get all the calendar buttons
         const dayButtons = daysDiv.querySelectorAll('button');
+
+        // loop through all the calendar buttons
         dayButtons.forEach(button => {
-            button.addEventListener('click', () => {
+            // get the date from the button
             const day = button.textContent;
             const monthIndex = currentMonth;
             const year = currentYear;
             const selectedDate = new Date(year, monthIndex, day);
-            
-            // Format the date
+
+            // format the date
             const newDate = new Date(selectedDate);
             const newYear = newDate.getFullYear();
             const newMonth = String(newDate.getMonth() + 1).padStart(2, '0');
             const newDay = String(newDate.getDate()).padStart(2, '0');
             const formattedDate = `${newYear}-${newMonth}-${newDay}`;
 
-            if (formattedDate) {
+            // if the date is in the list of completed dates, add the "done" class to the button
+            if (completedDates.includes(formattedDate)) {
+                button.classList.add('button_done');
+                }
 
-                // Update the date
-                const currentDateDiv = document.getElementById('current-date');
-                const dateSpan = currentDateDiv.querySelector('span');
+            // if the date is in the list of missed dates, add the "missed" class to the button
+            if (missedDates.includes(formattedDate)) {
+                button.classList.add('button_missed');
+        }
+        });
 
-                // Send the selected date to the Flask backend using AJAX
-                const xhr = new XMLHttpRequest();
-                const url = '/dashboard';
-                const data = formattedDate;
-                xhr.open('POST', url, true);
-                xhr.setRequestHeader('Content-Type', 'text/plain');
-                xhr.onload = function() {
-                  if (xhr.status === 200) {
-                    dateSpan.textContent = formattedDate;
-                    // Log to console that data was sent successfully and log the data itself
-                    console.log('Data sent successfully, data is: ' + data);
-                  } else {
-                    console.log('Error processing date');
-                  }
-                };
-                xhr.send(data);
-              }
+        // Add a click event listener to each of the day buttons
+        dayButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const day = button.textContent;
+                const monthIndex = currentMonth;
+                const year = currentYear;
+                const selectedDate = new Date(year, monthIndex, day);
+                console.log("selected date is " + selectedDate);
+                localStorage.setItem('selectedDate', selectedDate);
+                
+                // Format the date
+                const newDate = new Date(selectedDate);
+                const newYear = newDate.getFullYear();
+                const newMonth = String(newDate.getMonth() + 1).padStart(2, '0');
+                const newDay = String(newDate.getDate()).padStart(2, '0');
+                const formattedDate = `${newYear}-${newMonth}-${newDay}`;
+                console.log("formatted date is " + formattedDate);
+
+
+                if (formattedDate) {
+
+                    // Update the date
+                    const currentDateDiv = document.getElementById('current-date');
+                    const dateSpan = currentDateDiv.querySelector('span');
+
+                    // Send the selected date to the Flask backend using AJAX
+                    const xhr = new XMLHttpRequest();
+                    const url = '/dashboard';
+                    const data = formattedDate;
+                    xhr.open('POST', url, true);
+                    xhr.setRequestHeader('Content-Type', 'text/plain');
+                    xhr.onload = function() {
+                    if (xhr.status === 200) {
+                        dateSpan.textContent = formattedDate;
+                        // Log to console that data was sent successfully and log the data itself
+                        console.log('Data sent successfully, data is: ' + data);
+                    } else {
+                        console.log('Error processing date');
+                    }
+                    };
+                    xhr.send(data);
+                }
             });
-          });
+        });
     }
-    
     // Add event listeners to the prev and next month buttons
     prevMonthBtn.addEventListener('click', () => {
         currentMonth--;
@@ -303,44 +365,4 @@
 </script>
 
 <!-- Make dynamic border for each button depending on the entry for the date -->
-<script>
-    // get the list of completed and missed dates from the Flask backend
-    // if the list is empty, set the variable to an empty list
-    const completedDates = {{ completed_dates|tojson if completed_dates else [] }};
-    console.log(completedDates);
-    const missedDates = {{ missed_dates|tojson if missed_dates else [] }};
-    console.log(missedDates);
-
-    // get all the calendar buttons
-    const calendarButtons = document.querySelectorAll('.cal-days button');
-
-    // loop through the calendar buttons
-    calendarButtons.forEach(button => {
-
-        // get the date of the button
-        const day = button.textContent;
-        const monthIndex = currentMonth;
-        const year = currentYear;
-        const selectedDate = new Date(year, monthIndex, day);
-        
-        // format the date
-        const newDate = new Date(selectedDate);
-        const newYear = newDate.getFullYear();
-        const newMonth = String(newDate.getMonth() + 1).padStart(2, '0');
-        const newDay = String(newDate.getDate()).padStart(2, '0');
-        const formattedDate = `${newYear}-${newMonth}-${newDay}`;
-
-        // if the date is in the list of completed dates, add the "done" class to the button
-        if (completedDates.includes(formattedDate)) {
-            button.classList.add('button_done');
-        }
-
-        // if the date is in the list of missed dates, add the "missed" class to the button
-        if (missedDates.includes(formattedDate)) {
-            button.classList.add('button_missed');
-        }
-    });
-
-
-</script>
 {% endblock %}
