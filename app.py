@@ -522,9 +522,10 @@ def dashboard():
     # Get the habit from the form
     habit = request.form.get("habit_dashboard")
 
-    # Remember the habit in the session
+    # Set default habit to the first habit in the list
     if habit == None:
-        habit = session["habit"]
+        habit = habits[0]
+
 
     # Create a list with all the dates on which the habit were completed. 
     # The list will be used to color the calendar
@@ -553,15 +554,15 @@ def dashboard():
 
         # Remember the habit from the last time the page was refreshed
         session["habit"] = habit
-        print(f"session['habit']: {session['habit']}")
 
         # Set default value to current date
-        pickedDate = datetime.now().date()
+        global pickedDate
+        pickedDate = session["pickedDate"]
 
         # Get picked date from Javascript
         if request.data.decode('utf-8') != "":
             pickedDate = request.data.decode('utf-8')
-            # Convert picked date to datetime object
+            # Convert picked date to datetime object 
             pickedDate = datetime.strptime(pickedDate, '%Y-%m-%d').date()
         else:
             # Remember picked date from the last time the page was refreshed
@@ -586,7 +587,6 @@ def dashboard():
         with conn:
             cur = conn.cursor()
             cur.execute("SELECT value FROM history WHERE users_id = ? AND habit = ? AND date = ?", (user_id, habit, stringDate))
-            print(f"stringDate: {stringDate}")
             global currentEntry
             currentEntry = cur.fetchone()
             if currentEntry:
@@ -635,9 +635,7 @@ def dashboard():
             with conn:
                 cur = conn.cursor()
                 cur.execute("SELECT value FROM history WHERE users_id = ? AND habit = ? AND date = ?", (user_id, habit, stringDate))
-                print(f"stringDate: after change {stringDate}")
                 currentEntry = cur.fetchone()
-                print(f"currentEntry: after change: {currentEntry}") 
                 if currentEntry:
                     currentEntry = currentEntry[0]
                     if currentEntry == 1:
@@ -682,6 +680,9 @@ def dashboard():
         # Set default value to current date
         pickedDate = datetime.now().date()
 
+        # Use date from session instead of default value
+        pickedDate = session["pickedDate"]
+
         # Convert picked date to string
         stringDate = str(pickedDate)
 
@@ -691,9 +692,7 @@ def dashboard():
         with conn:
             cur = conn.cursor()
             cur.execute("SELECT value FROM history WHERE users_id = ? AND habit = ? AND date = ?", (user_id, habit, stringDate))
-            print(f"stringDate: after change {stringDate}")
             currentEntry = cur.fetchone()
-            print(f"currentEntry: after change: {currentEntry}") 
             if currentEntry:
                 currentEntry = currentEntry[0]
                 if currentEntry == 1:
@@ -704,7 +703,6 @@ def dashboard():
                     currentEntry = "Empty"
             else:
                 currentEntry = "Empty"
-            print(f"currentEntry: {currentEntry}")
 
         return render_template("dashboard.html", habits=habits, habit=habit, stringDate=stringDate, currentEntry=currentEntry, completed_dates=completed_dates, missed_dates=missed_dates)
 
