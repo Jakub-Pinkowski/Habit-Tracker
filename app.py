@@ -595,8 +595,6 @@ def dashboard():
         # Convert picked date to string
         stringDate = str(pickedDate)
 
-        
-
         # Get current entry for habit from database from table "history" for the picked date
         user_id = session["user_id"]
         conn = create_connection(database)
@@ -615,6 +613,27 @@ def dashboard():
                     currentEntry = "Empty"
             else:
                 currentEntry = "Empty"
+
+        # Jump to today form
+        jump_to_today = request.form.get("jump_to_today")
+
+        if jump_to_today:
+
+            # Set picked date to today
+            pickedDate = datetime.now().date()
+            
+            # Delete formattedDate from local storage (using is_reloaded from GET method)
+            is_reloaded = True
+
+            if is_reloaded is not None:
+                json.dumps(is_reloaded)
+            else:
+                json.dumps(False)
+
+            # Convert picked date to string
+            stringDate = str(pickedDate)
+
+            return render_template("dashboard.html", habit=habit, habits=habits, stringDate=stringDate, completed_dates=completed_dates, missed_dates=missed_dates, is_reloaded=is_reloaded)
 
         # Change entry form
         change_entry = request.form.get("change_entry")
