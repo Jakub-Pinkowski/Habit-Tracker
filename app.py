@@ -525,13 +525,10 @@ def dashboard():
     # Set habit to habit from session if it exists and if the user didn't select a habit from the form
     if habit == None and session.get("habit") != None:
         habit = session["habit"]
-    print(f"habit: {habit}")
 
     # Set default habit to the first habit in the list
     if habit == None:
         habit = habits[0]
-
-    print(f"habit: {habit}")
 
     # Create a list with all the dates on which the habit were completed. 
     # The list will be used to color the calendar
@@ -558,6 +555,24 @@ def dashboard():
     # Set default date to today
     pickedDate = datetime.now().date()
 
+    # Get picked date from Javascript
+    if request.data.decode('utf-8') != "":
+        pickedDate = request.data.decode('utf-8')
+        # Convert picked date to datetime object 
+        pickedDate = datetime.strptime(pickedDate, '%Y-%m-%d').date()
+        print(f"pickedDate: {pickedDate}")
+
+        # Save picked date in the session
+        session["pickedDate"] = pickedDate
+
+    elif pickedDate:
+        # Remember picked date from the last time the page was refreshed if session["pickedDate"] exists
+        if session.get("pickedDate") != None:
+            pickedDate = session["pickedDate"]
+
+    # Store the value of pickedDate in the session
+    session["pickedDate"] = pickedDate
+
      # Check if the page was reloaded
     is_reloaded = None
 
@@ -571,31 +586,11 @@ def dashboard():
     else:
         json.dumps(False)
 
-
     # User reached route via POST (as by submitting a form via POST)
     if request.method == "POST":
 
         # Remember the habit from the last time the page was refreshed
         session["habit"] = habit
-        print(f"session['habit']: {session['habit']}")
-
-        # Get picked date from Javascript
-        if request.data.decode('utf-8') != "":
-            pickedDate = request.data.decode('utf-8')
-            # Convert picked date to datetime object 
-            pickedDate = datetime.strptime(pickedDate, '%Y-%m-%d').date()
-
-            # Save picked date in the session
-            session["pickedDate"] = pickedDate
-
-        elif pickedDate:
-            # Remember picked date from the last time the page was refreshed if session["pickedDate"] exists
-            if session.get("pickedDate") != None:
-                pickedDate = session["pickedDate"]
-                print(f"session['pickedDate']: {session['pickedDate']}")
-
-        # Store the value of pickedDate in the session
-        session["pickedDate"] = pickedDate
 
         # Convert picked date to string
         stringDate = str(pickedDate)
@@ -604,7 +599,7 @@ def dashboard():
         if pickedDate > datetime.now().date():
             flash("Date cannot be in the future!")
             alert_type = "alert-danger"
-            return render_template("dashboard.html", alert_type=alert_type, habit=habit, habits=habits, stringDate=stringDate, completed_dates=completed_dates, missed_dates=missed_dates)
+            return render_template("dashboard.html", alert_type=alert_type, habit=habit, habits=habits, stringDate=stringDate, completed_dates=completed_dates, missed_dates=missed_dates, is_reloaded=is_reloaded)
 
 
         # Get current entry for habit from database from table "history" for the picked date
@@ -706,7 +701,11 @@ def dashboard():
         # Reset date to today
         pickedDate = datetime.now().date()
 
-
+        # Make sure that the picked date is not in the future
+        if pickedDate > datetime.now().date():
+            flash("Date cannot be in the future!")
+            alert_type = "alert-danger"
+            return render_template("dashboard.html", alert_type=alert_type, habit=habit, habits=habits, stringDate=stringDate, completed_dates=completed_dates, missed_dates=missed_dates, is_reloaded=is_reloaded)
 
         # Convert picked date to string
         stringDate = str(pickedDate)
