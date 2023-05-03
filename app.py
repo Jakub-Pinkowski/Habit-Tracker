@@ -27,6 +27,7 @@ Session(app)
 
 # Databeses functions
 
+# Define database
 database = (r"database.db")
 
 def create_connection(db_file):
@@ -560,7 +561,6 @@ def dashboard():
         pickedDate = request.data.decode('utf-8')
         # Convert picked date to datetime object 
         pickedDate = datetime.strptime(pickedDate, '%Y-%m-%d').date()
-        print(f"pickedDate: {pickedDate}")
 
         # Save picked date in the session
         session["pickedDate"] = pickedDate
@@ -654,7 +654,6 @@ def dashboard():
                 alert_type = "alert-danger"
                 return render_template("dashboard.html", alert_type=alert_type, habit=habit, habits=habits, stringDate=stringDate, completed_dates=completed_dates, missed_dates=missed_dates, is_reloaded=is_reloaded)
 
-
             # Update  entry in database
             # Check if there is already any entry for the picked date for the current user for the habit
             user_id = session["user_id"]
@@ -709,7 +708,6 @@ def dashboard():
                 for row in rows:
                     missed_dates.append(row[0])
 
-
             # Redirect user to dashboard page
             return render_template("dashboard.html", habits=habits, habit=habit, stringDate=stringDate, currentEntry=currentEntry, completed_dates=completed_dates, missed_dates=missed_dates, is_reloaded=is_reloaded)
         
@@ -744,9 +742,7 @@ def dashboard():
             else:
                 currentEntry = "Empty"
 
-
         return render_template("dashboard.html", habits=habits, habit=habit, stringDate=stringDate, currentEntry=currentEntry, completed_dates=completed_dates, missed_dates=missed_dates, is_reloaded=is_reloaded)
-
 
 @app.route("/archive", methods=["GET", "POST"])
 @login_required
@@ -826,7 +822,6 @@ def archive():
     
     return render_template("archive.html", habits=habits)
                         
-
 # Generate data for SSE
 def generate_data():
     """ Update current entry """

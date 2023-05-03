@@ -6,7 +6,6 @@
 
 {% block main %}
 
-
 <div class="dropdown">
     <button class="btn btn-lg btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
       Choose Habit
@@ -16,9 +15,9 @@
 
             {% for habit in habits %}
 
-            <li>
-                <input class="dropdown-item" type="submit" id="habit_dashboard" name="habit_dashboard" value="{{ habit }}">
-            </li>
+                <li>
+                    <input class="dropdown-item" type="submit" id="habit_dashboard" name="habit_dashboard" value="{{ habit }}">
+                </li>
 
             {% endfor %}
         
@@ -137,7 +136,6 @@
 <script>
     // Reset picked date to today when user refreshes the page or comes back to the page
     let isReloaded = {{ is_reloaded|tojson }};
-    console.log(isReloaded);
     if (isReloaded) {
         localStorage.removeItem('selectedDate');
     }
@@ -169,7 +167,6 @@
 
     // Get current date
     let currentDate = new Date();
-    console.log("current Date is: " + currentDate);
 
     // Get updated date
     let updatedDateStr = localStorage.getItem('selectedDate');
@@ -180,17 +177,16 @@
         currentDate = updatedDate;
     }
 
-    console.log("updated Date is: " + updatedDate);
-
     // Get current month and year
     let currentMonth = currentDate.getMonth();
     let currentYear = currentDate.getFullYear();
 
-
+    // Get number of days in month
     function daysInMonth(month, year) {
     return new Date(year, month + 1, 0).getDate();
     }
     
+    // Get first day of month
     function getFirstDayOfMonth(month, year) {
     return new Date(year, month, 1).getDay();
     }
@@ -261,9 +257,6 @@
                 });
                 button.classList.add('selected');
             });
-
-
-
         });
 
         // Add a click event listener to each of the day buttons
@@ -275,7 +268,6 @@
                 const monthIndex = currentMonth;
                 const year = currentYear;
                 const selectedDate = new Date(year, monthIndex, day);
-                console.log("selected date is " + selectedDate);
                 localStorage.setItem('selectedDate', selectedDate);
                 
                 // Format the date
@@ -284,7 +276,6 @@
                 const newMonth = String(newDate.getMonth() + 1).padStart(2, '0');
                 const newDay = String(newDate.getDate()).padStart(2, '0');
                 const formattedDate = `${newYear}-${newMonth}-${newDay}`;
-                console.log("formatted date is " + formattedDate);
 
 
                 if (formattedDate) {
@@ -387,4 +378,5 @@
         entry.classList.add("empty");
     }
 </script>
+
 {% endblock %}
