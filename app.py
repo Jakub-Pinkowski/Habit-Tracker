@@ -522,10 +522,17 @@ def dashboard():
     # Get the habit from the form
     habit = request.form.get("habit_dashboard")
 
+    # Set habit to habit from session if it exists
+    if session.get("habit"):
+        habit = session["habit"]
+        session.pop("habit", None)
+    print(f"habit: {habit}")
+
     # Set default habit to the first habit in the list
     if habit == None:
         habit = habits[0]
 
+    print(f"habit: {habit}")
 
     # Create a list with all the dates on which the habit were completed. 
     # The list will be used to color the calendar
@@ -557,6 +564,7 @@ def dashboard():
 
         # Remember the habit from the last time the page was refreshed
         session["habit"] = habit
+        print(f"session['habit']: {session['habit']}")
 
         # Get picked date from Javascript
         if request.data.decode('utf-8') != "":
@@ -683,7 +691,6 @@ def dashboard():
         if session.get("pickedDate"):
             # Remember picked date from the last time the page was refreshed
             pickedDate = session["pickedDate"]
-        print(f"session['pickedDate']: {session['pickedDate']}")
         print(f"pickedDate: {pickedDate}")
 
         # Convert picked date to string
