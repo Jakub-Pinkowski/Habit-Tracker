@@ -527,9 +527,15 @@ def dashboard():
     if habit == None and session.get("habit") != None:
         habit = session["habit"]
 
-    # Set default habit to the first habit in the list
-    if habit == None:
+    # Set default habit to the first habit in the list if it exists
+    if habit == None and len(habits) > 0:
         habit = habits[0]
+
+    # If habits list is empty, redirect user to habits page
+    if len(habits) == 0:
+        flash("You don't have any habits yet!")
+        alert_type = "alert-danger"
+        return render_template("habits.html", alert_type=alert_type, habits=habits)
 
     # Create a list with all the dates on which the habit were completed. 
     # The list will be used to color the calendar
@@ -835,6 +841,12 @@ def archive():
         rows = cur.fetchall()
         for row in rows:
             habits.append(row[0])
+
+    # if habits list is empty alert user
+    if not habits:
+        flash("You don't have any archived habits yet!")
+        alert_type = "alert-danger"
+        return render_template("archive.html", alert_type=alert_type)
     
     return render_template("archive.html", habits=habits)
                         
