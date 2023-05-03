@@ -133,6 +133,7 @@
 </ul>
 
 
+<!-- Reset the date -->
 <script>
     // Reset picked date to today when user refreshes the page or comes back to the page
     let isReloaded = {{ is_reloaded|tojson }};
@@ -339,18 +340,18 @@
     }
 </script>
 
-<!-- Change style of data element depending on the entry -->
+<!-- Change style of current entry element depending on the entry -->
 <script>
-    // get the "data" element
+    // Get the "data" element
     var entry = document.getElementById("data");
 
-    // set up a mutation observer to watch for changes to the "data" element
+    // Set up a mutation observer to watch for changes to the "data" element
     var observer = new MutationObserver(function(mutationsList, observer) {
 
-        // get the new value of the "data" element
+        // Get the new value of the "data" element
         var newValue = entry.textContent.trim();
         
-        // update the class of the "data" element based on the new value
+        // Update the class of the "data" element based on the new value
         if (newValue === "Done") {
             entry.classList.remove("missed");
             entry.classList.remove("empty");
@@ -368,7 +369,7 @@
 
     observer.observe(entry, {characterData: true, subtree: true});
 
-    // update the initial class of the "data" element based on its initial value
+    // Update the initial class of the "data" element based on its initial value
     let initialValue = entry.textContent.trim();
     if (initialValue === "done") {
         entry.classList.add("done");
