@@ -558,6 +558,20 @@ def dashboard():
     # Set default date to today
     pickedDate = datetime.now().date()
 
+     # Check if the page was reloaded
+    is_reloaded = None
+
+    if request.method == 'GET':
+        is_reloaded = True
+    else:
+        is_reloaded = False
+
+    if is_reloaded is not None:
+        json.dumps(is_reloaded)
+    else:
+        json.dumps(False)
+
+
     # User reached route via POST (as by submitting a form via POST)
     if request.method == "POST":
 
@@ -573,10 +587,13 @@ def dashboard():
 
             # Save picked date in the session
             session["pickedDate"] = pickedDate
-        else:
-            # Remember picked date from the last time the page was refreshed
-            pickedDate = session["pickedDate"]
-            print(f"session['pickedDate']: {session['pickedDate']}")
+
+        elif pickedDate:
+            # Remember picked date from the last time the page was refreshed if session["pickedDate"] exists
+            if session.get("pickedDate") != None:
+                pickedDate = session["pickedDate"]
+                print(f"session['pickedDate']: {session['pickedDate']}")
+
         # Store the value of pickedDate in the session
         session["pickedDate"] = pickedDate
 
@@ -677,20 +694,19 @@ def dashboard():
 
 
             # Redirect user to dashboard page
-            return render_template("dashboard.html", habits=habits, habit=habit, stringDate=stringDate, currentEntry=currentEntry, completed_dates=completed_dates, missed_dates=missed_dates)
+            return render_template("dashboard.html", habits=habits, habit=habit, stringDate=stringDate, currentEntry=currentEntry, completed_dates=completed_dates, missed_dates=missed_dates, is_reloaded=is_reloaded)
         
         # Redirect user to dashboard page 
         else:
-            return render_template("dashboard.html", habits=habits, habit=habit, stringDate=stringDate, currentEntry=currentEntry, completed_dates=completed_dates, missed_dates=missed_dates)
+            return render_template("dashboard.html", habits=habits, habit=habit, stringDate=stringDate, currentEntry=currentEntry, completed_dates=completed_dates, missed_dates=missed_dates, is_reloaded=is_reloaded)
 
     # User reached route via GET (as by clicking a link or via redirect)
     else:
 
-        # Retrieve session date if it exists
-        if session.get("pickedDate"):
-            # Remember picked date from the last time the page was refreshed
-            pickedDate = session["pickedDate"]
-        print(f"pickedDate: {pickedDate}")
+        # Reset date to today
+        pickedDate = datetime.now().date()
+
+
 
         # Convert picked date to string
         stringDate = str(pickedDate)
@@ -713,7 +729,8 @@ def dashboard():
             else:
                 currentEntry = "Empty"
 
-        return render_template("dashboard.html", habits=habits, habit=habit, stringDate=stringDate, currentEntry=currentEntry, completed_dates=completed_dates, missed_dates=missed_dates)
+
+        return render_template("dashboard.html", habits=habits, habit=habit, stringDate=stringDate, currentEntry=currentEntry, completed_dates=completed_dates, missed_dates=missed_dates, is_reloaded=is_reloaded)
 
 
 @app.route("/archive", methods=["GET", "POST"])

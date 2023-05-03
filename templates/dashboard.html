@@ -132,6 +132,15 @@
 </ul>
 
 
+<script>
+    // Reset picked date to today when user refreshes the page or comes back to the page
+    let isReloaded = {{ is_reloaded|tojson }};
+    console.log(isReloaded);
+    if (isReloaded) {
+        localStorage.removeItem('selectedDate');
+    }
+</script>
+
 <!-- Calendar -->
 <script>
 
@@ -163,11 +172,17 @@
     // Get updated date
     let updatedDateStr = localStorage.getItem('selectedDate');
     let updatedDate = new Date(Date.parse(updatedDateStr));
+
+    // if updated date exists, change current date to updated date
+    if (updatedDateStr) {
+        currentDate = updatedDate;
+    }
+
     console.log("updated Date is: " + updatedDate);
 
     // Get current month and year
-    let currentMonth = updatedDate.getMonth();
-    let currentYear = updatedDate.getFullYear();
+    let currentMonth = currentDate.getMonth();
+    let currentYear = currentDate.getFullYear();
 
 
     function daysInMonth(month, year) {
