@@ -522,10 +522,9 @@ def dashboard():
     # Get the habit from the form
     habit = request.form.get("habit_dashboard")
 
-    # Set habit to habit from session if it exists
-    if session.get("habit"):
+    # Set habit to habit from session if it exists and if the user didn't select a habit from the form
+    if habit == None and session.get("habit") != None:
         habit = session["habit"]
-        session.pop("habit", None)
     print(f"habit: {habit}")
 
     # Set default habit to the first habit in the list
