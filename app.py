@@ -595,12 +595,7 @@ def dashboard():
         # Convert picked date to string
         stringDate = str(pickedDate)
 
-        # Make sure that the picked date is not in the future
-        if pickedDate > datetime.now().date():
-            flash("Date cannot be in the future!")
-            alert_type = "alert-danger"
-            return render_template("dashboard.html", alert_type=alert_type, habit=habit, habits=habits, stringDate=stringDate, completed_dates=completed_dates, missed_dates=missed_dates, is_reloaded=is_reloaded)
-
+        
 
         # Get current entry for habit from database from table "history" for the picked date
         user_id = session["user_id"]
@@ -625,13 +620,21 @@ def dashboard():
         change_entry = request.form.get("change_entry")
 
         if change_entry:
-
+            
+            # Convert change_entry to integer
             if change_entry == "Done":
                 change_entry = 1
             elif change_entry == "Missed":
                 change_entry = -1
             elif change_entry == "Empty":
                 change_entry = 0
+
+            # Make sure that the picked date is not in the future
+            if pickedDate > datetime.now().date():
+                flash("Date cannot be in the future!")
+                alert_type = "alert-danger"
+                return render_template("dashboard.html", alert_type=alert_type, habit=habit, habits=habits, stringDate=stringDate, completed_dates=completed_dates, missed_dates=missed_dates, is_reloaded=is_reloaded)
+
 
             # Update  entry in database
             # Check if there is already any entry for the picked date for the current user for the habit
@@ -700,12 +703,6 @@ def dashboard():
 
         # Reset date to today
         pickedDate = datetime.now().date()
-
-        # Make sure that the picked date is not in the future
-        if pickedDate > datetime.now().date():
-            flash("Date cannot be in the future!")
-            alert_type = "alert-danger"
-            return render_template("dashboard.html", alert_type=alert_type, habit=habit, habits=habits, stringDate=stringDate, completed_dates=completed_dates, missed_dates=missed_dates, is_reloaded=is_reloaded)
 
         # Convert picked date to string
         stringDate = str(pickedDate)
