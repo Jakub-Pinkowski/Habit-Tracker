@@ -592,6 +592,22 @@ def dashboard():
     # User reached route via POST (as by submitting a form via POST)
     if request.method == "POST":
 
+        # Reset the date to today
+        if request.form.get("habit_dashboard"):
+            # Set picked date to today
+            pickedDate = datetime.now().date()
+
+            # Convert picked date to string
+            stringDate = str(pickedDate)
+
+        # Delete formattedDate from local storage (using is_reloaded from GET method)
+            is_reloaded = True
+
+            if is_reloaded is not None:
+                json.dumps(is_reloaded)
+            else:
+                json.dumps(False)
+
         # Remember the habit from the last time the page was refreshed
         session["habit"] = habit
 
