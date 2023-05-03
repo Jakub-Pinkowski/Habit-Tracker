@@ -573,6 +573,9 @@ def dashboard():
     # Store the value of pickedDate in the session
     session["pickedDate"] = pickedDate
 
+    # Convert picked date to string
+    stringDate = str(pickedDate)
+
      # Check if the page was reloaded
     is_reloaded = None
 
@@ -591,9 +594,6 @@ def dashboard():
 
         # Remember the habit from the last time the page was refreshed
         session["habit"] = habit
-
-        # Convert picked date to string
-        stringDate = str(pickedDate)
 
         # Get current entry for habit from database from table "history" for the picked date
         user_id = session["user_id"]
@@ -621,6 +621,9 @@ def dashboard():
 
             # Set picked date to today
             pickedDate = datetime.now().date()
+
+            # Convert picked date to string
+            stringDate = str(pickedDate)
             
             # Delete formattedDate from local storage (using is_reloaded from GET method)
             is_reloaded = True
@@ -629,9 +632,6 @@ def dashboard():
                 json.dumps(is_reloaded)
             else:
                 json.dumps(False)
-
-            # Convert picked date to string
-            stringDate = str(pickedDate)
 
             return render_template("dashboard.html", habit=habit, habits=habits, stringDate=stringDate, completed_dates=completed_dates, missed_dates=missed_dates, is_reloaded=is_reloaded)
 
