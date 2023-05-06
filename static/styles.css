@@ -148,10 +148,12 @@ z-index: 1500;
 
 .dropdown-item {
     padding: 0.5rem;
+    z-index: 9999;
 }
 
 .dropdown-menu {
     width: 301px;
+    z-index: 9999;
 }
 
 #trash-dropdown {
@@ -340,4 +342,9 @@ ul {
 
 .width_33{
   width: 33.3333%;
+}
+
+.main_container_dashboard {
+  margin-top: 5rem;
+  z-index: 0;
 }
