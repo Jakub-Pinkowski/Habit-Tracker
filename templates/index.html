@@ -4,35 +4,59 @@
     Index
 {% endblock %}
 
-{% block main %}    
+{% block main %}   
 
-<div class="row row-cols-1 row-cols-md-3 mb-3 text-center">
 
-  {% for habit in habits %}
 
-    <div class="col">
-      <div class="card mb-4 rounded-3 shadow-sm">
-        <div class="card-header py-3">
-          <h4 class="my-0 fw-normal">{{ habit.name }}</h4>
-        </div>
-        <div class="card-body">
-          <h1 class="card-title pricing-card-title">{{ habit.streak }}<small class="text-body-secondary fw-light">days streak</small></h1>
-          <ul class="list-unstyled mt-3 mb-4">
-            <li>Did you do it today?</li>
-          </ul>
-          <form action="/" method="post" id="done_or_missed">
-            <input type="hidden" id="habit{{ habit.id }}" name="habit{{ habit.id }}" value="{{ habit.name }}">
-            <button type="input" class="btn btn-lg btn-success done_or_missed_button"
-             id="value{{ habit.id }}" name="value{{ habit.id }}" type="button" value="1">Done</button>
-            <button type="input" class="btn btn-lg btn-danger done_or_missed_button"
-             id="value{{ habit.id }}" name="value{{ habit.id }}" type="button" value="-1">Missed</button>
-          </form>
+  {% if habits  %}
+
+    <div class="row row-cols-1 row-cols-md-3 mb-3 text-center">
+
+    {% for habit in habits %}
+    
+      <div class="col">
+          <div class="card mb-4 rounded-3 shadow-sm">
+          <div class="card-header py-3">
+            <h4 class="my-0 fw-normal">{{ habit.name }}</h4>
+          </div>
+          <div class="card-body">
+            <h1 class="card-title pricing-card-title">{{ habit.streak }}<small class="text-body-secondary fw-light">days streak</small></h1>
+            <ul class="list-unstyled mt-3 mb-4">
+              <li>Did you do it today?</li>
+            </ul>
+            <form action="/" method="post" id="done_or_missed">
+              <input type="hidden" id="habit{{ habit.id }}" name="habit{{ habit.id }}" value="{{ habit.name }}">
+              <button type="input" class="btn btn-lg btn-success done_or_missed_button"
+              id="value{{ habit.id }}" name="value{{ habit.id }}" type="button" value="1">Done</button>
+              <button type="input" class="btn btn-lg btn-danger done_or_missed_button"
+              id="value{{ habit.id }}" name="value{{ habit.id }}" type="button" value="-1">Missed</button>
+            </form>
+          </div>
         </div>
       </div>
-    </div>
-
+    
     {% endfor %}
 
-</div>
+    </div>
+
+  {% else %}
+
+    <h2>
+      You don't have any habits to display
+    </h2>
+    <p>
+        <form action="/habits" method="post">
+          <input type="hidden" name="habits_redirect" id="habits_redirect">
+          <button class="btn btn-primary roundex-pill px-3 m-4" type="submit">
+            Head over here to add some habits
+          </button>
+        </form>
+    </p>
+
+  {% endif %}
+
+  
+
+
 
 {% endblock %}
