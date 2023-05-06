@@ -272,6 +272,12 @@ def index():
         for row in rows:
             habits.append(Habit(row[0], len(habits) + 1, 0))
 
+    # User logged in for the first time
+    if not habits:
+        flash("Welcome to Habit Tracker!")
+        alert_type = "alert-primary"
+        return render_template("index.html", alert_type=alert_type)
+
     # User reached route via POST (as by submitting a form via POST)
     if request.method == "POST":
 

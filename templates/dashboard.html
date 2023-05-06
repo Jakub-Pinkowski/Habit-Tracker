@@ -118,7 +118,7 @@
 
 <ul> Completed dates:
     {% for date in completed_dates%}
-        <li>
+        <li class="no_decoration done">
             {{ date }}
         </li>
     {% endfor %}
@@ -126,7 +126,7 @@
 
 <ul> Missed dates:
     {% for date in missed_dates%}
-        <li>
+    <li class="no_decoration missed">
             {{ date }}
         </li>
     {% endfor %}

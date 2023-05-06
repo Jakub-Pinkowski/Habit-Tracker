@@ -329,3 +329,7 @@ z-index: 1500;
 #name_of_the_habit {
   width: 250px;
 }
+
+.no_decoration {
+  list-style-type: none;;
+}
