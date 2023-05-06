@@ -326,10 +326,6 @@ z-index: 1500;
   width: 100px;
 }
 
-#name_of_the_habit {
-  width: 250px;
-}
-
 .no_decoration {
   list-style-type: none;;
 }
@@ -340,4 +336,8 @@ z-index: 1500;
 
 ul {
   padding-left: 0;
+}
+
+.width_33{
+  width: 33.3333%;
 }

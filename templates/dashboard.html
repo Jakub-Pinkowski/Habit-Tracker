@@ -25,13 +25,13 @@
     </ul>
   </div>
 
-<div id="main_container_dashboard" class="d-flex align-items-center py-md-5 main_container_dashboard">
-    <div id="name_of_the_habit" class="p-4">
+<div class="d-flex align-items-center py-md-5 main_container_dashboard">
+    <div id="name_of_the_habit" class="p-4 width_33">
         <h2>
             {{ habit }}
         </h2>
     </div>
-    <div id="calendar" class="d-flex flex-column flex-md-row p-4 gap-4 py-md-5 align-items-center justify-content-center">
+    <div id="calendar" class="d-flex flex-column flex-md-row p-4 gap-4 py-md-5 align-items-center justify-content-center width_33">
         <div class="dropdown-menu d-block position-static p-2 mx-0 shadow rounded-3 w-340px" data-bs-theme="auto">
             <div class="d-grid gap-1">
                 <div class="cal">
@@ -77,10 +77,10 @@
             </div>
         </div>
     </div>
-    <div id="change_entries">
+    <div id="change_entries" class="width_3">
         <div id="current-date" class="p-4">
             <h5 class="p-3">
-                Date:
+                Picked date:
             </h4>
             <span>
                 {{ stringDate }}
@@ -117,6 +117,18 @@
 
 <div>
     <h4>
+        Longest streak so far:
+    </h4>
+    <span class="done streak">
+        {{ longest_streak }} days
+    </span> 
+    <h4>
+        Current streak:
+    </h4>
+    <span class="done streak">
+        {{ current_streak }} days
+    </span>
+    <h4>
         Completed dates:
     </h4>
     <ul> 
@@ -136,18 +148,7 @@
             </li>
         {% endfor %}
     </ul>
-    <h4>
-        Longest streak so far:
-    </h4>
-    <span class="done streak">
-        {{ longest_streak }} days
-    </span> 
-    <h4>
-        Current streak:
-    </h4>
-    <span class="done streak">
-        {{ current_streak }} days
-    </span>
+
 </div>
 
 
