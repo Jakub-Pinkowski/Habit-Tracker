@@ -553,6 +553,8 @@ def dashboard():
         rows = cur.fetchall()
         for row in rows:
             completed_dates.append(row[0])
+    # list all the dates chronologically
+    completed_dates.sort(key=lambda date: datetime.strptime(date, "%Y-%m-%d"))
 
     # Create a list with all the dates on which the habits were missed. 
     # The list will be used to color the calendar
@@ -564,6 +566,8 @@ def dashboard():
         rows = cur.fetchall()
         for row in rows:
             missed_dates.append(row[0])
+    # list all the dates chronologically
+    missed_dates.sort(key=lambda date: datetime.strptime(date, "%Y-%m-%d"))
 
     # Set default date to today
     pickedDate = datetime.now().date()
