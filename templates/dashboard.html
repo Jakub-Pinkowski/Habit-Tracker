@@ -115,29 +115,41 @@
     </div>
 </div>
 
+<div>
+    <h4>
+        Completed dates:
+    </h4>
+    <ul> 
+        {% for date in completed_dates %}
+            <li class="no_decoration done">
+                {{ date }}
+            </li>
+        {% endfor %}
+    </ul>
+    <h4>
+        Missed dates:
+    </h4>
+    <ul>
+        {% for date in missed_dates %}
+        <li class="no_decoration missed">
+                {{ date }}
+            </li>
+        {% endfor %}
+    </ul>
+    <h4>
+        Longest streak so far:
+    </h4>
+    <span class="done streak">
+        {{ longest_streak }} days
+    </span> 
+    <h4>
+        Current streak:
+    </h4>
+    <span class="done streak">
+        {{ current_streak }} days
+    </span>
+</div>
 
-<ul> Completed dates:
-    {% for date in completed_dates %}
-        <li class="no_decoration done">
-            {{ date }}
-        </li>
-    {% endfor %}
-</ul>
-
-<ul> Missed dates:
-    {% for date in missed_dates %}
-    <li class="no_decoration missed">
-            {{ date }}
-        </li>
-    {% endfor %}
-</ul>
-
-<h4>
-    Longest streak so far:
-</h4>
-<span class="done" id="longest_streak">
-    {{ longest_streak }} days
-</span> 
 
 
 <!-- Reset the date -->

@@ -334,6 +334,10 @@ z-index: 1500;
   list-style-type: none;;
 }
 
-#longest_streak {
+.streak {
   font-size: 2rem;
+}
+
+ul {
+  padding-left: 0;
 }
