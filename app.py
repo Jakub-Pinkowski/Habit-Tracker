@@ -555,6 +555,22 @@ def dashboard():
             completed_dates.append(row[0])
     # list all the dates chronologically
     completed_dates.sort(key=lambda date: datetime.strptime(date, "%Y-%m-%d"))
+    print(completed_dates)
+
+    # Calculate the longest streak
+    longest_streak = 0
+    streak = 0
+    for i in range(len(completed_dates)):
+        if i == 0:
+            streak += 1
+        else:
+            if (datetime.strptime(completed_dates[i], "%Y-%m-%d") - datetime.strptime(completed_dates[i-1], "%Y-%m-%d")).days == 1:
+                streak += 1
+            else:
+                if streak > longest_streak:
+                    longest_streak = streak
+                streak = 1
+    print(longest_streak)
 
     # Create a list with all the dates on which the habits were missed. 
     # The list will be used to color the calendar
@@ -665,7 +681,7 @@ def dashboard():
             else:
                 json.dumps(False)
 
-            return render_template("dashboard.html", habit=habit, habits=habits, stringDate=stringDate, completed_dates=completed_dates, missed_dates=missed_dates, is_reloaded=is_reloaded)
+            return render_template("dashboard.html", habit=habit, habits=habits, stringDate=stringDate, completed_dates=completed_dates, missed_dates=missed_dates, is_reloaded=is_reloaded, longest_streak=longest_streak)
 
         # Change entry form
         change_entry = request.form.get("change_entry")
@@ -684,7 +700,7 @@ def dashboard():
             if pickedDate > datetime.now().date():
                 flash("Date cannot be in the future!")
                 alert_type = "alert-danger"
-                return render_template("dashboard.html", alert_type=alert_type, habit=habit, habits=habits, stringDate=stringDate, completed_dates=completed_dates, missed_dates=missed_dates, is_reloaded=is_reloaded)
+                return render_template("dashboard.html", alert_type=alert_type, habit=habit, habits=habits, stringDate=stringDate, completed_dates=completed_dates, missed_dates=missed_dates, is_reloaded=is_reloaded, longest_streak=longest_streak)
 
             # Update  entry in database
             # Check if there is already any entry for the picked date for the current user for the habit
@@ -730,6 +746,8 @@ def dashboard():
                 rows = cur.fetchall()
                 for row in rows:
                     completed_dates.append(row[0])
+            completed_dates.sort(key=lambda date: datetime.strptime(date, "%Y-%m-%d"))
+            print(completed_dates)
 
             missed_dates = []
             conn = create_connection(database)
@@ -739,13 +757,29 @@ def dashboard():
                 rows = cur.fetchall()
                 for row in rows:
                     missed_dates.append(row[0])
+            missed_dates.sort(key=lambda date: datetime.strptime(date, "%Y-%m-%d"))
 
+            # Calculate the longest streak
+            longest_streak = 0
+            streak = 0
+            for i in range(len(completed_dates)):
+                if i == 0:
+                    streak += 1
+                else:
+                    if (datetime.strptime(completed_dates[i], "%Y-%m-%d") - datetime.strptime(completed_dates[i-1], "%Y-%m-%d")).days == 1:
+                        streak += 1
+                    else:
+                        if streak > longest_streak:
+                            longest_streak = streak
+                        streak = 1
+            print(longest_streak)
+            
             # Redirect user to dashboard page
-            return render_template("dashboard.html", habits=habits, habit=habit, stringDate=stringDate, currentEntry=currentEntry, completed_dates=completed_dates, missed_dates=missed_dates, is_reloaded=is_reloaded)
+            return render_template("dashboard.html", habits=habits, habit=habit, stringDate=stringDate, currentEntry=currentEntry, completed_dates=completed_dates, missed_dates=missed_dates, is_reloaded=is_reloaded, longest_streak=longest_streak)
         
         # Redirect user to dashboard page 
         else:
-            return render_template("dashboard.html", habits=habits, habit=habit, stringDate=stringDate, currentEntry=currentEntry, completed_dates=completed_dates, missed_dates=missed_dates, is_reloaded=is_reloaded)
+            return render_template("dashboard.html", habits=habits, habit=habit, stringDate=stringDate, currentEntry=currentEntry, completed_dates=completed_dates, missed_dates=missed_dates, is_reloaded=is_reloaded, longest_streak=longest_streak)
 
     # User reached route via GET (as by clicking a link or via redirect)
     else:
@@ -774,7 +808,7 @@ def dashboard():
             else:
                 currentEntry = "Empty"
 
-        return render_template("dashboard.html", habits=habits, habit=habit, stringDate=stringDate, currentEntry=currentEntry, completed_dates=completed_dates, missed_dates=missed_dates, is_reloaded=is_reloaded)
+        return render_template("dashboard.html", habits=habits, habit=habit, stringDate=stringDate, currentEntry=currentEntry, completed_dates=completed_dates, missed_dates=missed_dates, is_reloaded=is_reloaded, longest_streak=longest_streak)
 
 @app.route("/archive", methods=["GET", "POST"])
 @login_required

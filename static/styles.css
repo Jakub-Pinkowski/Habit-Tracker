@@ -333,3 +333,7 @@ z-index: 1500;
 .no_decoration {
   list-style-type: none;;
 }
+
+#longest_streak {
+  font-size: 2rem;
+}

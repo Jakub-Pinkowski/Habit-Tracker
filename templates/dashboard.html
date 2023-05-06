@@ -117,7 +117,7 @@
 
 
 <ul> Completed dates:
-    {% for date in completed_dates%}
+    {% for date in completed_dates %}
         <li class="no_decoration done">
             {{ date }}
         </li>
@@ -125,12 +125,19 @@
 </ul>
 
 <ul> Missed dates:
-    {% for date in missed_dates%}
+    {% for date in missed_dates %}
     <li class="no_decoration missed">
             {{ date }}
         </li>
     {% endfor %}
 </ul>
+
+<h4>
+    Longest streak so far:
+</h4>
+<span class="done" id="longest_streak">
+    {{ longest_streak }} days
+</span> 
 
 
 <!-- Reset the date -->
