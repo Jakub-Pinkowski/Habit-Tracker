@@ -1,5 +1,6 @@
 import sqlite3
 from sqlite3 import Error
+import json
 from flask import Flask, flash, redirect, render_template, request, session, url_for, jsonify, Response
 from flask_session import Session
 from werkzeug.security import check_password_hash, generate_password_hash
@@ -26,6 +27,7 @@ Session(app)
 
 # Databeses functions
 
+# Define database
 database = (r"database.db")
 
 def create_connection(db_file):
@@ -103,29 +105,6 @@ def register():
             alert_type = "alert-danger"
             return render_template("register.html", alert_type=alert_type)
         
-        # Check if password contains at least one number
-        elif not any(char.isdigit() for char in password):
-            flash("Password must contain at least one number!")
-            alert_type = "alert-danger"
-            return render_template("register.html", alert_type=alert_type)
-        
-        # Check if password contains at least one uppercase letter
-        elif not any(char.isupper() for char in password):
-            flash("Password must contain at least one uppercase letter!")
-            alert_type = "alert-danger"
-            return render_template("register.html", alert_type=alert_type)
-        
-        # Check if password contains at least one lowercase letter
-        elif not any(char.islower() for char in password):
-            flash("Password must contain at least one lowercase letter!")
-            alert_type = "alert-danger"
-            return render_template("register.html", alert_type=alert_type)
-        
-        # Check if password contains at least one special character
-        elif not any(char in "!@#$%^&*()-+?_=,<>/;:[]{}" for char in password):
-            flash("Password must contain at least one special character!")
-            alert_type = "alert-danger"
-            return render_template("register.html", alert_type=alert_type)
         
         # Ensure confirmation was submitted
         elif not confirmation:
@@ -269,6 +248,12 @@ def index():
         rows = cur.fetchall()
         for row in rows:
             habits.append(Habit(row[0], len(habits) + 1, 0))
+
+    # User logged in for the first time
+    if not habits:
+        flash("Welcome to Habit Tracker!")
+        alert_type = "alert-primary"
+        return render_template("index.html", alert_type=alert_type)
 
     # User reached route via POST (as by submitting a form via POST)
     if request.method == "POST":
@@ -520,42 +505,136 @@ def dashboard():
 
     # Get the habit from the form
     habit = request.form.get("habit_dashboard")
-    print(f"habit: {habit}")
 
-    if habit == None:
+    # Set habit to habit from session if it exists and if the user didn't select a habit from the form
+    if habit == None and session.get("habit") != None:
         habit = session["habit"]
+
+    # Set default habit to the first habit in the list if it exists
+    if habit == None and len(habits) > 0:
+        habit = habits[0]
+
+    # If habits list is empty, redirect user to habits page
+    if len(habits) == 0:
+        flash("You don't have any habits yet!")
+        alert_type = "alert-danger"
+        return render_template("habits.html", alert_type=alert_type, habits=habits)
+
+    # Create a list with all the dates on which the habit were completed. 
+    # The list will be used to color the calendar
+    completed_dates = []
+    conn = create_connection(database)
+    with conn:
+        cur = conn.cursor()
+        cur.execute("SELECT date FROM history WHERE users_id = ? AND habit = ? AND value = 1", (user_id, habit))
+        rows = cur.fetchall()
+        for row in rows:
+            completed_dates.append(row[0])
+    # Sort all the dates chronologically
+    completed_dates.sort(key=lambda date: datetime.strptime(date, "%Y-%m-%d"))
+
+    # Calculate the longest streak
+    longest_streak = 0
+    streak = 0
+
+    # Calculate the longest streak so far
+    for i in range(len(completed_dates)):
+        if i == 0:
+            streak = 1
+            longest_streak = 1
+        else:
+            # Calculate the difference in days between the current date and the previous date
+            diff = datetime.strptime(completed_dates[i], "%Y-%m-%d") - datetime.strptime(completed_dates[i-1], "%Y-%m-%d")
+            if diff == timedelta(days=1):
+                streak += 1
+                if streak > longest_streak:
+                    longest_streak = streak
+            else:
+                streak = 1
+
+    # Calculate the longest streak counting from today
+    current_streak = 0
+    i = len(completed_dates) - 1
+
+    while i >= 0:
+        # Calculate the difference in days between the current date and the completed date
+        diff = datetime.now().date() - datetime.strptime(completed_dates[i], "%Y-%m-%d").date()
+        if diff == timedelta(days=current_streak):
+            current_streak += 1
+            i -= 1
+        else:
+            break
+
+    # Create a list with all the dates on which the habits were missed. 
+    # The list will be used to color the calendar
+    missed_dates = []
+    conn = create_connection(database)
+    with conn:
+        cur = conn.cursor()
+        cur.execute("SELECT date FROM history WHERE users_id = ? AND habit = ? AND value = -1", (user_id, habit))
+        rows = cur.fetchall()
+        for row in rows:
+            missed_dates.append(row[0])
+    # list all the dates chronologically
+    missed_dates.sort(key=lambda date: datetime.strptime(date, "%Y-%m-%d"))
+
+    # Set default date to today
+    pickedDate = datetime.now().date()
+
+    # Get picked date from Javascript
+    if request.data.decode('utf-8') != "":
+        pickedDate = request.data.decode('utf-8')
+        # Convert picked date to datetime object 
+        pickedDate = datetime.strptime(pickedDate, '%Y-%m-%d').date()
+
+        # Save picked date in the session
+        session["pickedDate"] = pickedDate
+
+    elif pickedDate:
+        # Remember picked date from the last time the page was refreshed if session["pickedDate"] exists
+        if session.get("pickedDate") != None:
+            pickedDate = session["pickedDate"]
+
+    # Store the value of pickedDate in the session
+    session["pickedDate"] = pickedDate
+
+    # Convert picked date to string
+    stringDate = str(pickedDate)
+
+     # Check if the page was reloaded
+    is_reloaded = None
+
+    if request.method == 'GET':
+        is_reloaded = True
+    else:
+        is_reloaded = False
+
+    if is_reloaded is not None:
+        json.dumps(is_reloaded)
+    else:
+        json.dumps(False)
 
     # User reached route via POST (as by submitting a form via POST)
     if request.method == "POST":
 
+        # Reset the date to today
+        if request.form.get("habit_dashboard"):
+            # Set picked date to today
+            pickedDate = datetime.now().date()
+
+            # Convert picked date to string
+            stringDate = str(pickedDate)
+
+        # Delete formattedDate from local storage (using is_reloaded from GET method)
+            is_reloaded = True
+
+            if is_reloaded is not None:
+                json.dumps(is_reloaded)
+            else:
+                json.dumps(False)
+
         # Remember the habit from the last time the page was refreshed
         session["habit"] = habit
-        print(f"session['habit']: {session['habit']}")
-
-        # Set default value to current date
-        pickedDate = datetime.now().date()
-
-        # Get picked date from Javascript
-        if request.data.decode('utf-8') != "":
-            pickedDate = request.data.decode('utf-8')
-            # Convert picked date to datetime object
-            pickedDate = datetime.strptime(pickedDate, '%Y-%m-%d').date()
-        else:
-            # Remember picked date from the last time the page was refreshed
-            pickedDate = session["pickedDate"]
-            print(f"session['pickedDate']: {session['pickedDate']}")
-
-        # Store the value of pickedDate in the session
-        session["pickedDate"] = pickedDate
-
-        # Make sure that the picked date is not in the future
-        if pickedDate > datetime.now().date():
-            flash("Date cannot be in the future!")
-            alert_type = "alert-danger"
-            return render_template("dashboard.html", alert_type=alert_type, habits=habits)
-
-        # Convert picked date to string
-        stringDate = str(pickedDate)
 
         # Get current entry for habit from database from table "history" for the picked date
         user_id = session["user_id"]
@@ -563,10 +642,8 @@ def dashboard():
         with conn:
             cur = conn.cursor()
             cur.execute("SELECT value FROM history WHERE users_id = ? AND habit = ? AND date = ?", (user_id, habit, stringDate))
-            print(f"stringDate: {stringDate}")
             global currentEntry
             currentEntry = cur.fetchone()
-            print(f"currentEntry: {currentEntry}") 
             if currentEntry:
                 currentEntry = currentEntry[0]
                 if currentEntry == 1:
@@ -578,17 +655,45 @@ def dashboard():
             else:
                 currentEntry = "Empty"
 
+        # Jump to today form
+        jump_to_today = request.form.get("jump_to_today")
+
+        if jump_to_today:
+
+            # Set picked date to today
+            pickedDate = datetime.now().date()
+
+            # Convert picked date to string
+            stringDate = str(pickedDate)
+            
+            # Delete formattedDate from local storage (using is_reloaded from GET method)
+            is_reloaded = True
+
+            if is_reloaded is not None:
+                json.dumps(is_reloaded)
+            else:
+                json.dumps(False)
+
+            return render_template("dashboard.html", habit=habit, habits=habits, stringDate=stringDate, completed_dates=completed_dates, missed_dates=missed_dates, is_reloaded=is_reloaded, longest_streak=longest_streak, current_streak=current_streak)
+
         # Change entry form
         change_entry = request.form.get("change_entry")
 
         if change_entry:
-
+            
+            # Convert change_entry to integer
             if change_entry == "Done":
                 change_entry = 1
             elif change_entry == "Missed":
                 change_entry = -1
             elif change_entry == "Empty":
                 change_entry = 0
+
+            # Make sure that the picked date is not in the future
+            if pickedDate > datetime.now().date():
+                flash("Date cannot be in the future!")
+                alert_type = "alert-danger"
+                return render_template("dashboard.html", alert_type=alert_type, habit=habit, habits=habits, stringDate=stringDate, completed_dates=completed_dates, missed_dates=missed_dates, is_reloaded=is_reloaded, longest_streak=longest_streak, current_streak=current_streak)
 
             # Update  entry in database
             # Check if there is already any entry for the picked date for the current user for the habit
@@ -607,19 +712,13 @@ def dashboard():
                     cur.execute("INSERT INTO history (users_id, habit, date, value) VALUES(?, ?, ?, ?)", (user_id, habit, stringDate, change_entry))
                     conn.commit()
 
-            # TESTING
-            print(f"change_entry: {change_entry}")
-
-
             # Get current entry for habit from database from table "history" for the picked date
             user_id = session["user_id"]
             conn = create_connection(database)
             with conn:
                 cur = conn.cursor()
                 cur.execute("SELECT value FROM history WHERE users_id = ? AND habit = ? AND date = ?", (user_id, habit, stringDate))
-                print(f"stringDate: after change {stringDate}")
                 currentEntry = cur.fetchone()
-                print(f"currentEntry: after change: {currentEntry}") 
                 if currentEntry:
                     currentEntry = currentEntry[0]
                     if currentEntry == 1:
@@ -631,21 +730,67 @@ def dashboard():
                 else:
                     currentEntry = "Empty"
 
-            # Flash
-            flash("Entry updated!")
-            alert_type = "alert-primary"
+            # Update completed_dates and missed_dates lists
+            completed_dates = []
+            conn = create_connection(database)
+            with conn:
+                cur = conn.cursor()
+                cur.execute("SELECT date FROM history WHERE users_id = ? AND habit = ? AND value = 1", (user_id, habit))
+                rows = cur.fetchall()
+                for row in rows:
+                    completed_dates.append(row[0])
+            completed_dates.sort(key=lambda date: datetime.strptime(date, "%Y-%m-%d"))
+            print(completed_dates)
 
+            missed_dates = []
+            conn = create_connection(database)
+            with conn:
+                cur = conn.cursor()
+                cur.execute("SELECT date FROM history WHERE users_id = ? AND habit = ? AND value = -1", (user_id, habit))
+                rows = cur.fetchall()
+                for row in rows:
+                    missed_dates.append(row[0])
+            missed_dates.sort(key=lambda date: datetime.strptime(date, "%Y-%m-%d"))
+
+            # Calculate the longest streak so far
+            for i in range(len(completed_dates)):
+                if i == 0:
+                    streak = 1
+                    longest_streak = 1
+                else:
+                    # Calculate the difference in days between the current date and the previous date
+                    diff = datetime.strptime(completed_dates[i], "%Y-%m-%d") - datetime.strptime(completed_dates[i-1], "%Y-%m-%d")
+                    if diff == timedelta(days=1):
+                        streak += 1
+                        if streak > longest_streak:
+                            longest_streak = streak
+                    else:
+                        streak = 1
+
+            # Calculate the longest streak counting from today
+            current_streak = 0
+            i = len(completed_dates) - 1
+
+            while i >= 0:
+                # Calculate the difference in days between the current date and the completed date
+                diff = datetime.now().date() - datetime.strptime(completed_dates[i], "%Y-%m-%d").date()
+                if diff == timedelta(days=current_streak):
+                    current_streak += 1
+                    i -= 1
+                else:
+                    break
+            
             # Redirect user to dashboard page
-            return render_template("dashboard.html", alert_type=alert_type, habit=habit, habits=habits, stringDate=stringDate, currentEntry=currentEntry)
+            return render_template("dashboard.html", habits=habits, habit=habit, stringDate=stringDate, currentEntry=currentEntry, completed_dates=completed_dates, missed_dates=missed_dates, is_reloaded=is_reloaded, longest_streak=longest_streak, current_streak=current_streak)
         
         # Redirect user to dashboard page 
         else:
-            return render_template("dashboard.html", habits=habits, habit=habit, stringDate=stringDate, currentEntry=currentEntry)
+            return render_template("dashboard.html", habits=habits, habit=habit, stringDate=stringDate, currentEntry=currentEntry, completed_dates=completed_dates, missed_dates=missed_dates, is_reloaded=is_reloaded, longest_streak=longest_streak, current_streak=current_streak)
 
     # User reached route via GET (as by clicking a link or via redirect)
     else:
 
-        # Set default value to current date
+        # Reset date to today
         pickedDate = datetime.now().date()
 
         # Convert picked date to string
@@ -657,9 +802,7 @@ def dashboard():
         with conn:
             cur = conn.cursor()
             cur.execute("SELECT value FROM history WHERE users_id = ? AND habit = ? AND date = ?", (user_id, habit, stringDate))
-            print(f"stringDate: after change {stringDate}")
             currentEntry = cur.fetchone()
-            print(f"currentEntry: after change: {currentEntry}") 
             if currentEntry:
                 currentEntry = currentEntry[0]
                 if currentEntry == 1:
@@ -671,8 +814,7 @@ def dashboard():
             else:
                 currentEntry = "Empty"
 
-        return render_template("dashboard.html", habits=habits, habit=habit, stringDate=stringDate, currentEntry=currentEntry)
-
+        return render_template("dashboard.html", habits=habits, habit=habit, stringDate=stringDate, currentEntry=currentEntry, completed_dates=completed_dates, missed_dates=missed_dates, is_reloaded=is_reloaded, longest_streak=longest_streak, current_streak=current_streak)
 
 @app.route("/archive", methods=["GET", "POST"])
 @login_required
@@ -749,10 +891,15 @@ def archive():
         rows = cur.fetchall()
         for row in rows:
             habits.append(row[0])
+
+    # if habits list is empty alert user
+    if not habits:
+        flash("You don't have any archived habits yet!")
+        alert_type = "alert-danger"
+        return render_template("archive.html", alert_type=alert_type)
     
     return render_template("archive.html", habits=habits)
                         
-
 # Generate data for SSE
 def generate_data():
     """ Update current entry """
