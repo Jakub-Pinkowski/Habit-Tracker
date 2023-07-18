@@ -105,7 +105,6 @@ def register():
             alert_type = "alert-danger"
             return render_template("register.html", alert_type=alert_type)
         
-        
         # Ensure confirmation was submitted
         elif not confirmation:
             flash("Please provide confirmation!")
